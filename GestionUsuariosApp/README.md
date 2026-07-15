@@ -23,9 +23,11 @@ La aplicación implementa flujos avanzados de seguridad y validación, destacand
 
 ## ⚙️ Estructura y Patrones de Diseño
 
-El proyecto sigue una arquitectura **MVC** clásica para garantizar limpieza y escalabilidad:
+El proyecto sigue una arquitectura **MVC** clásica para garantizar limpieza y escalabilidad, apoyada por herramientas modernas:
+* **Entity Framework Core (Code-First):** La base de datos y sus tablas se generan automáticamente a partir de las clases (Modelos) mediante migraciones, facilitando el despliegue.
+* **Scaffolding:** Se utilizó el motor de generación de código (Scaffolding) de ASP.NET Core para estructurar rápidamente los controladores y vistas base del CRUD, los cuales fueron posteriormente modificados y altamente personalizados para ajustarse a los requerimientos de diseño de Figma.
 * **Models:** Define la entidad `Usuario` y sus anotaciones.
-* **Controllers:** Contiene la lógica de autenticación y de negocio (CRUD) en `UsuariosController.cs`.
+* **Controllers:** Contiene la lógica de autenticación y de negocio en `UsuariosController.cs`.
 * **Views:** Pantallas dinámicas procesadas con *Razor*, complementadas con CSS personalizado para lograr un nivel estético *premium*, empleando gradientes, glassmorfismo y micro-animaciones.
 
 ## 💻 Instrucciones de Ejecución Local
@@ -37,10 +39,15 @@ Para correr el proyecto en un entorno local, sigue estos pasos:
    git clone https://github.com/Vicray27/GestionUsuariosApp.git
    ```
 
-2. **Configurar la Base de Datos:**
+2. **Configurar la Base de Datos (Code-First):**
    - Abre el archivo `appsettings.json`.
-   - Modifica el string de conexión (`DefaultConnection`) para que apunte a tu servidor de SQL Server local.
-   - Restaura el script de la base de datos `GestionUsuariosDB` si dispones del *bak* o *script SQL*, o en su defecto asegúrate de que exista la tabla `Usuarios` con los campos correspondientes.
+   - Modifica el string de conexión (`DefaultConnection`) para que apunte a tu servidor de SQL Server local (ej. `Server=(localdb)\\mssqllocaldb;Database=GestionUsuariosDB;...` o tu instancia de SQL Server).
+   - Abre Visual Studio y dirígete a **Herramientas > Administrador de paquetes NuGet > Consola del Administrador de paquetes**.
+   - Asegúrate de que `GestionUsuariosApp` esté seleccionado como proyecto predeterminado.
+   - Ejecuta el comando para crear la base de datos y la tabla automáticamente:
+     ```powershell
+     Update-Database
+     ```
 
 3. **Ejecutar el proyecto:**
    - Abre la solución `GestionUsuariosApp.sln` con Visual Studio.
