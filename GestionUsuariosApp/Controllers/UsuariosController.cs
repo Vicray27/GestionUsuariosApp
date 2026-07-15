@@ -60,7 +60,7 @@ namespace GestionUsuariosApp.Controllers
 
             if (usuario == null)
             {
-                ViewBag.ErrorUsuario = "Usuario incorrecto";
+                ViewBag.ErrorUsuario = "Verifique sus credenciales";
                 return View();
             }
 
@@ -110,7 +110,7 @@ namespace GestionUsuariosApp.Controllers
                 _context.Update(usuario);
                 await _context.SaveChangesAsync();
 
-                ViewBag.ErrorCredenciales = "Contraseña incorrecta";
+                ViewBag.ErrorCredenciales = "Verifique sus credenciales";
                 return View();
             }
 
