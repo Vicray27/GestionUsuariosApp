@@ -1,0 +1,828 @@
+@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CEPLAN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            background: #f3f4f6;
+        }
+
+        /* ══════════════════════════════════
+                   LAYOUT
+                ══════════════════════════════════ */
+        .app-shell {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* ══════════════════════════════════
+                   SIDEBAR
+                ══════════════════════════════════ */
+        .sidebar {
+            width: 64px;
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0;
+            z-index: 200;
+            flex-shrink: 0;
+        }
+
+        .sidebar-toggle {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #2563eb;
+            font-size: 1.3rem;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: background .2s;
+            border: none;
+            background: none;
+        }
+
+            .sidebar-toggle:hover {
+                background: #eff6ff;
+            }
+
+        .sidebar-item {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #9ca3af;
+            font-size: 1.15rem;
+            text-decoration: none;
+            margin-bottom: 6px;
+            transition: background .2s, color .2s;
+            position: relative;
+        }
+
+            .sidebar-item:hover {
+                background: #f3f4f6;
+                color: #374151;
+            }
+
+            .sidebar-item.active {
+                background: #fee2e2;
+                color: #dc2626;
+            }
+
+            .sidebar-item::after {
+                content: attr(data-tip);
+                position: absolute;
+                left: calc(100% + 10px);
+                background: #1f2937;
+                color: #fff;
+                font-size: .72rem;
+                font-weight: 600;
+                white-space: nowrap;
+                padding: 4px 10px;
+                border-radius: 6px;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .2s;
+            }
+
+            .sidebar-item:hover::after {
+                opacity: 1;
+            }
+
+        /* ══════════════════════════════════
+                   MAIN WRAPPER
+                ══════════════════════════════════ */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        /* ══════════════════════════════════
+                   NAVBAR
+                ══════════════════════════════════ */
+        .top-navbar {
+            height: 52px;
+            background-color: #9b1c1c;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 20px;
+            gap: 6px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+
+        .nav-icon-btn {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: rgba(255,255,255,.85);
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: background .2s, color .2s;
+            position: relative;
+        }
+
+            .nav-icon-btn:hover {
+                background: rgba(255,255,255,.15);
+                color: #fff;
+            }
+
+        .notif-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 16px;
+            height: 16px;
+            background: #2563eb;
+            border-radius: 50%;
+            font-size: .58rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #9b1c1c;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255,255,255,.25);
+            margin: 0 6px;
+        }
+
+        /* Indicador de sesión en navbar */
+        .session-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: .7rem;
+            color: rgba(255,255,255,.75);
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background .2s;
+        }
+
+            .session-indicator .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #4ade80;
+                box-shadow: 0 0 0 2px rgba(74,222,128,.25);
+                animation: pulse 2s infinite;
+            }
+
+            .session-indicator.warning .dot {
+                background: #fbbf24;
+                box-shadow: 0 0 0 2px rgba(251,191,36,.25);
+            }
+
+        @@keyframes pulse {
+            0%, 100%
+
+        {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .4;
+        }
+
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background .2s;
+            text-decoration: none;
+        }
+
+            .nav-user:hover {
+                background: rgba(255,255,255,.12);
+            }
+
+        .nav-user-text {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+            line-height: 1.25;
+        }
+
+        .nav-user-name {
+            font-size: .78rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .nav-user-role {
+            font-size: .7rem;
+            color: #fca5a5;
+        }
+
+        .nav-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.2);
+            border: 2px solid rgba(255,255,255,.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* ══════════════════════════════════
+                   CONTENT
+                ══════════════════════════════════ */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 36px;
+            background: #f3f4f6;
+        }
+
+        /* ══════════════════════════════════
+                   DROPDOWN
+                ══════════════════════════════════ */
+        .dropdown-menu {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+            padding: 6px;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            border-radius: 7px;
+            font-size: .85rem;
+            padding: 8px 12px;
+            transition: background .15s;
+        }
+
+            .dropdown-item:hover {
+                background: #f9fafb;
+            }
+
+            .dropdown-item.text-danger {
+                color: #dc2626 !important;
+            }
+
+                .dropdown-item.text-danger:hover {
+                    background: #fef2f2;
+                }
+
+        .dropdown-divider {
+            border-color: #f3f4f6;
+        }
+
+        /* ══════════════════════════════════
+                   MODAL INACTIVIDAD (NUEVO DISEÑO)
+                ══════════════════════════════════ */
+        #inactivityModal .modal-content {
+            border: 0;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            background-color: #f3f4f6; /* Fondo gris claro según captura */
+        }
+
+        .btn-extend {
+            background-color: #d97706;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 8px 24px;
+            font-size: .95rem;
+            transition: background .2s, transform .15s;
+        }
+
+            .btn-extend:hover {
+                background-color: #b45309;
+                color: #fff;
+            }
+
+        /* ══════════════════════════════════
+                   TOAST SYSTEM
+                ══════════════════════════════════ */
+        .toast-stack {
+            position: fixed;
+            top: 62px;
+            right: 16px;
+            z-index: 1400;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            min-width: 300px;
+            max-width: 360px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            pointer-events: all;
+            animation: toastIn .35s cubic-bezier(.34,1.56,.64,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @@keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(60px) scale(.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @@keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+                max-height: 120px;
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(60px) scale(.9);
+                max-height: 0;
+            }
+        }
+
+        .toast-item.hiding {
+            animation: toastOut .3s ease forwards;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            transform-origin: left;
+        }
+
+        .toast-info {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            color: #1e3a5f;
+        }
+
+        .toast-success {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            color: #14532d;
+        }
+
+        .toast-warning {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            color: #78350f;
+        }
+
+        .toast-danger {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-info .toast-progress {
+            background: #3b82f6;
+        }
+
+        .toast-success .toast-progress {
+            background: #22c55e;
+        }
+
+        .toast-warning .toast-progress {
+            background: #f59e0b;
+        }
+
+        .toast-danger .toast-progress {
+            background: #ef4444;
+        }
+
+        .toast-info .toast-icon {
+            color: #3b82f6;
+        }
+
+        .toast-success .toast-icon {
+            color: #22c55e;
+        }
+
+        .toast-warning .toast-icon {
+            color: #f59e0b;
+        }
+
+        .toast-danger .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            font-size: .83rem;
+            margin-bottom: 2px;
+        }
+
+        .toast-msg {
+            font-size: .78rem;
+            opacity: .85;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: .95rem;
+            cursor: pointer;
+            opacity: .45;
+            padding: 0;
+            line-height: 1;
+            transition: opacity .2s;
+            color: inherit;
+        }
+
+            .toast-close:hover {
+                opacity: 1;
+            }
+    </style>
+</head>
+<body>
+
+    <!-- ══ MODAL INACTIVIDAD ══ -->
+    <div class="modal fade" id="inactivityModal"
+         data-bs-backdrop="static" data-bs-keyboard="false"
+         tabindex="-1" aria-labelledby="inactivityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 580px;">
+            <div class="modal-content">
+                <div class="modal-body p-4 pb-3">
+                    <div class="d-flex align-items-start gap-4">
+                        <div class="flex-shrink-0 mt-1">
+                            <!-- Ícono amarillo/naranja -->
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #d97706; fill: #fef3c7;">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                              <line x1="12" y1="9" x2="12" y2="13"></line>
+                              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 id="inactivityModalLabel" class="fw-bold text-dark mb-2" style="font-size: 1.15rem;">Su sesión esta a punto de expirar</h5>
+                            <p class="text-secondary mb-4" style="font-size: 0.95rem;">
+                                Por seguridad, su sesión expirará en <span id="sessionCountdown" class="fw-medium text-dark">60</span> segundos. Para continuar, seleccione "Extender sesión"
+                            </p>
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn-extend" onclick="mantenerSesion()">
+                                    Extender sesión
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ TOAST STACK ══ -->
+    <div class="toast-stack" id="toastStack"></div>
+
+    <!-- ══ APP SHELL ══ -->
+    <div class="app-shell">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <button class="sidebar-toggle"
+                    onclick="showToast('info','Menú','La navegación completa estará disponible próximamente.')">
+                <i class="bi bi-list"></i>
+            </button>
+            @* <a asp-controller="Usuarios" asp-action="Dashboard"
+               class="sidebar-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")"
+               data-tip="Mi Perfil">
+                <i class="bi bi-person-badge"></i>
+            </a> *@
+            <a asp-controller="Usuarios" asp-action="Index"
+               class="sidebar-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")"
+               data-tip="Directorio">
+                <i class="bi bi-people"></i>
+            </a>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="main-wrapper">
+
+            <!-- NAVBAR -->
+            <nav class="top-navbar">
+
+                <div class="session-indicator" id="sessionIndicator" title="Estado de sesión">
+                    <span class="dot"></span>
+                    <span id="sessionStatusText">En línea</span>
+                </div>
+
+                <div class="nav-divider"></div>
+
+                <button class="nav-icon-btn"
+                        onclick="showToast('info','Ayuda','Contacte con el área de soporte técnico.')">
+                    <i class="bi bi-question-lg"></i>
+                </button>
+
+                <button class="nav-icon-btn me-2"
+                        onclick="showToast('info','Notificaciones','No tiene notificaciones nuevas.')">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="notif-badge">9+</span>
+                </button>
+
+                <div class="nav-divider"></div>
+
+                <div class="dropdown ms-1">
+                    <a href="#" class="nav-user text-decoration-none" data-bs-toggle="dropdown">
+                        <div class="nav-user-text">
+                            <span class="nav-user-name" id="globalUserName">@User.Identity?.Name</span>
+                            <span class="nav-user-role">@(User.FindFirst("Cargo")?.Value ?? "Usuario")</span>
+                        </div>
+                        <div class="nav-avatar" id="globalNavAvatar">
+                            <i class="bi bi-person"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end mt-2">
+                        <li>
+                            <span class="dropdown-item disabled" style="font-size:.75rem; color:#9ca3af;">
+                                <i class="bi bi-circle-fill me-2" style="font-size:.5rem; color:#4ade80;"></i>
+                                Sesión activa
+                            </span>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger"
+                               asp-controller="Usuarios" asp-action="Salir">
+                                <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- CONTENT -->
+            <div class="content-area">
+                @RenderBody()
+            </div>
+
+        </div>
+    </div>
+
+   
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /* ══════════════════════════════════════════
+           TOAST SYSTEM
+        ══════════════════════════════════════════ */
+        const TOAST_ICONS  = {
+            danger:  'bi-x-octagon-fill',
+            success: 'bi-check-circle-fill',
+            warning: 'bi-exclamation-triangle-fill',
+            info:    'bi-info-circle-fill'
+        };
+        const TOAST_TITLES = {
+            danger:'Error', success:'¡Éxito!', warning:'Advertencia', info:'Información'
+        };
+
+        function showToast(type = 'info', title = '', msg = '', dur = 4500) {
+            const stack = document.getElementById('toastStack');
+            if (!stack) return;
+            const item = document.createElement('div');
+            item.className = `toast-item toast-${type}`;
+            item.innerHTML = `
+                <i class="bi ${TOAST_ICONS[type]} toast-icon"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${title || TOAST_TITLES[type]}</div>
+                    <div class="toast-msg">${msg}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this.parentElement)">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="toast-progress"></div>`;
+
+            stack.appendChild(item);
+            const prog = item.querySelector('.toast-progress');
+            prog.style.transition = `transform ${dur}ms linear`;
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                prog.style.transform = 'scaleX(0)';
+            }));
+            item._timer = setTimeout(() => closeToast(item), dur);
+            item.addEventListener('mouseenter', () => clearTimeout(item._timer));
+            item.addEventListener('mouseleave', () => {
+                item._timer = setTimeout(() => closeToast(item), 1500);
+            });
+        }
+
+        function closeToast(el) {
+            if (!el || el.classList.contains('hiding')) return;
+            clearTimeout(el._timer);
+            el.classList.add('hiding');
+            el.addEventListener('animationend', () => el.remove(), { once: true });
+        }
+
+        /* ══════════════════════════════════════════
+           AVATAR INICIALES & TEMPDATA TOAST
+        ══════════════════════════════════════════ */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mostrar toast de TempData
+            const successMsg = '@Html.Raw(TempData["MensajeExito"] ?? "")';
+            if (successMsg && typeof showToast === 'function') {
+                showToast('success', '¡Éxito!', successMsg);
+            }
+
+            // Iniciales del avatar
+            const nameEl = document.getElementById('globalUserName');
+            if (nameEl && nameEl.innerText.trim()) {
+                const parts    = nameEl.innerText.trim().split(' ');
+                const initials = (parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '');
+                const avatar   = document.getElementById('globalNavAvatar');
+                if (avatar && initials) avatar.textContent = initials.toUpperCase();
+            }
+        });
+
+        /* ══════════════════════════════════════════
+           SISTEMA DE INACTIVIDAD
+        ══════════════════════════════════════════ */
+        const WARNING_MINUTES = 20;      // ← minutos de inactividad antes del aviso (por defecto)
+        const GRACE_SECONDS   = 60;      // ← segundos del countdown
+        
+        // 🛑 CONFIGURACIÓN DE PRODUCCIÓN 🛑: El usuario solicitó 20 minutos por defecto.
+        // const WARNING_MS = 5 * 1000;  
+        // Para volver a 20 minutos:
+        const WARNING_MS = WARNING_MINUTES * 60 * 1000;
+
+        let _warningTimer   = null;
+        let _countdownTimer = null;
+        let _timeLeft       = GRACE_SECONDS;
+        let _modalInstance  = null;
+        let _modalVisible   = false;
+
+        /* Instancia única del modal */
+        function getModal() {
+            if (!_modalInstance) {
+                const el = document.getElementById('inactivityModal');
+                if (!el) return null;
+                _modalInstance = new bootstrap.Modal(el, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+            }
+            return _modalInstance;
+        }
+
+        /* Reinicia el ciclo de inactividad */
+        function resetInactivity() {
+            if (_modalVisible) return;
+
+            clearTimeout(_warningTimer);
+            clearInterval(_countdownTimer);
+            _warningTimer = setTimeout(mostrarAdvertencia, WARNING_MS);
+        }
+
+        /* Muestra el modal y arranca el countdown */
+        function mostrarAdvertencia() {
+            _modalVisible = true;
+            _timeLeft     = GRACE_SECONDS;
+
+            const countdownEl = document.getElementById('sessionCountdown');
+            if (countdownEl) countdownEl.textContent = GRACE_SECONDS;
+
+            // Indicador navbar → alerta
+            const ind     = document.getElementById('sessionIndicator');
+            const statTxt = document.getElementById('sessionStatusText');
+            if (ind)     ind.classList.add('warning');
+            if (statTxt) statTxt.textContent = 'Sesión expirando';
+
+            const modal = getModal();
+            if (modal) modal.show();
+
+            // Countdown
+            _countdownTimer = setInterval(() => {
+                _timeLeft--;
+
+                if (countdownEl) countdownEl.textContent = _timeLeft;
+
+                if (_timeLeft <= 0) {
+                    clearInterval(_countdownTimer);
+                    cerrarSesionAutomatico();
+                }
+            }, 1000);
+        }
+
+        /* El usuario extiende la sesión */
+        function mantenerSesion() {
+            clearInterval(_countdownTimer);
+            clearTimeout(_warningTimer);
+            _modalVisible = false;
+
+            const modal = getModal();
+            if (modal) modal.hide();
+
+            // Restaurar indicador
+            const ind     = document.getElementById('sessionIndicator');
+            const statTxt = document.getElementById('sessionStatusText');
+            if (ind)     ind.classList.remove('warning');
+            if (statTxt) statTxt.textContent = 'En línea';
+
+            // Ping al servidor para renovar cookie
+            fetch('/Usuarios/ExtenderSesion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }).catch(() => { /* continúa aunque falle el ping */ });
+
+            resetInactivity();
+            showToast('success', 'Sesión extendida', 'Su sesión ha sido renovada exitosamente.');
+        }
+
+        /* Cierre manual desde el modal */
+        function cerrarSesionManual() {
+            clearInterval(_countdownTimer);
+            clearTimeout(_warningTimer);
+            _modalVisible = false;
+            const modal = getModal();
+            if (modal) modal.hide();
+            window.location.href = '/Usuarios/Salir';
+        }
+
+        /* Cierre automático */
+        function cerrarSesionAutomatico() {
+            const modal = getModal();
+            if (modal) modal.hide();
+            // Ya no mostramos toast en esta pantalla, sino que pasamos el flag a la vista de Login
+            window.location.href = '/Usuarios/Salir?expired=true';
+        }
+
+        /* Arrancar solo si hay usuario autenticado */
+        document.addEventListener('DOMContentLoaded', () => {
+            const userName = document.getElementById('globalUserName')?.innerText?.trim();
+            if (!userName) return;
+
+            const events = ['mousemove', 'mousedown', 'keypress',
+                            'scroll', 'touchstart', 'click'];
+            events.forEach(ev =>
+                window.addEventListener(ev, resetInactivity, { passive: true })
+            );
+
+            resetInactivity(); // ← primer ciclo
+        });
+    </script>
+
+   
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

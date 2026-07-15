@@ -1,0 +1,420 @@
+@model IEnumerable<GestionUsuariosApp.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Directorio de Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ══════════════════════════════════
+       BREADCRUMB Y TÍTULO
+    ══════════════════════════════════ */
+    .breadcrumb-text {
+        font-size: .78rem; color: #9ca3af;
+        margin-bottom: 4px; display: flex;
+        align-items: center; gap: 6px;
+    }
+
+    .page-title {
+        font-size: 1.4rem; font-weight: 700;
+        color: #1f2937; margin-bottom: 0;
+    }
+
+    /* ══════════════════════════════════
+       CARD CONTENEDORA
+    ══════════════════════════════════ */
+    .dir-card {
+        background: #fff; border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        overflow: hidden; animation: cardIn .35s ease;
+    }
+
+    @@keyframes cardIn {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Toolbar superior de la card ── */
+    .dir-toolbar {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex; align-items: center;
+        justify-content: space-between; gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    /* ── Buscador ── */
+    .search-wrap {
+        position: relative; flex: 1; min-width: 200px; max-width: 320px;
+    }
+    .search-wrap .bi {
+        position: absolute; left: 11px; top: 50%;
+        transform: translateY(-50%); color: #9ca3af;
+        font-size: .9rem; pointer-events: none;
+        transition: color .2s;
+    }
+    .search-input {
+        width: 100%; padding: 8px 12px 8px 34px;
+        font-size: .85rem; color: #1f2937;
+        background: #f9fafb; border: 1px solid #e5e7eb;
+        border-radius: 8px; transition: border-color .2s, background .2s;
+    }
+    .search-input:focus {
+        outline: none; border-color: #6366f1;
+        background: #fff; box-shadow: none;
+    }
+    .search-wrap:focus-within .bi { color: #6366f1; }
+
+    /* ── Contador de resultados ── */
+    .result-count {
+        font-size: .75rem; color: #9ca3af;
+        font-weight: 600; white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════
+       TABLA
+    ══════════════════════════════════ */
+    .dir-table { width: 100%; border-collapse: collapse; }
+
+    .dir-table thead tr {
+        background: #fafafa; border-bottom: 1px solid #f3f4f6;
+    }
+
+    .dir-table thead th {
+        font-size: .72rem; font-weight: 700; color: #9ca3af;
+        text-transform: uppercase; letter-spacing: .6px;
+        padding: 13px 20px; white-space: nowrap;
+    }
+
+    .dir-table tbody tr {
+        border-bottom: 1px solid #f9fafb;
+        transition: background .15s;
+    }
+    .dir-table tbody tr:last-child { border-bottom: none; }
+    .dir-table tbody tr:hover { background: #fafafa; }
+
+    .dir-table td { padding: 15px 20px; vertical-align: middle; }
+
+    /* ── Celda: Colaborador ── */
+    .collab-wrap { display: flex; align-items: center; gap: 12px; }
+
+    .collab-avatar {
+        width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+        background: linear-gradient(135deg, #93c5fd, #6b8dd6);
+        display: flex; align-items: center; justify-content: center;
+        font-size: .82rem; font-weight: 700; color: #fff;
+        border: 2px solid #e0e7ff;
+    }
+
+    .collab-name {
+        font-size: .88rem; font-weight: 700; color: #1f2937;
+        margin-bottom: 2px; line-height: 1.2;
+    }
+    .collab-email {
+        font-size: .75rem; color: #9ca3af; line-height: 1.2;
+    }
+
+    /* ── Celda: Documento ── */
+    .doc-chip {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: #f3f4f6; border-radius: 6px;
+        padding: 4px 10px; font-size: .78rem;
+        font-weight: 600; color: #4b5563;
+    }
+    .doc-chip i { color: #9ca3af; font-size: .8rem; }
+
+    /* ── Celda: Cargo / Área ── */
+    .cargo-name { font-size: .85rem; font-weight: 600; color: #374151; }
+    .area-name  { font-size: .75rem; color: #9ca3af; margin-top: 2px; }
+
+    /* ── Badge estado ── */
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: .68rem; font-weight: 700; padding: 4px 10px;
+        border-radius: 20px; white-space: nowrap;
+    }
+    .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    .badge-activo    { background: #dcfce7; color: #166534; }
+    .badge-activo    .dot { background: #22c55e; }
+
+    .badge-inactivo  { background: #f3f4f6; color: #6b7280; }
+    .badge-inactivo  .dot { background: #9ca3af; }
+
+    .badge-bloqueado { background: #fef2f2; color: #991b1b; }
+    .badge-bloqueado .dot { background: #ef4444; }
+
+    /* ── Acciones ── */
+    .action-btn {
+        width: 32px; height: 32px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 7px; border: 1px solid #e5e7eb;
+        background: #fff; color: #6b7280; font-size: .9rem;
+        text-decoration: none; transition: background .15s, border-color .15s, color .15s;
+    }
+    .action-btn:hover { border-color: transparent; }
+
+    .action-btn.view:hover  { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+    .action-btn.edit:hover  { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+    .action-btn.del:hover   { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+    /* ── Empty state ── */
+    .empty-state {
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: center; padding: 64px 20px; gap: 10px;
+    }
+    .empty-state i { font-size: 2.5rem; color: #d1d5db; }
+    .empty-state p { font-size: .88rem; color: #9ca3af; margin: 0; }
+
+    /* ── Pie de tabla ── */
+    .dir-footer {
+        padding: 12px 20px; border-top: 1px solid #f3f4f6;
+        display: flex; align-items: center;
+        justify-content: space-between;
+        font-size: .75rem; color: #9ca3af; flex-wrap: wrap; gap: 8px;
+    }
+
+    /* ── Botón Registrar ── */
+    .btn-new {
+        background: linear-gradient(90deg, #6b8dd6 0%, #7c9fe8 100%);
+        border: none; color: #fff; font-weight: 700;
+        border-radius: 8px; padding: 9px 18px; font-size: .88rem;
+        transition: filter .2s, transform .15s, box-shadow .2s;
+        display: inline-flex; align-items: center; gap: 7px;
+        text-decoration: none; white-space: nowrap;
+    }
+    .btn-new:hover {
+        filter: brightness(1.08); transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(107,141,214,.4); color: #fff;
+    }
+    .btn-new:active { transform: translateY(0); }
+</style>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-text">
+    <i class="bi bi-house"></i> Inicio
+    <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+    Directorio de usuarios
+</div>
+
+<!-- TÍTULO + BOTÓN -->
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <h4 class="page-title">Directorio de Usuarios</h4>
+    <a asp-action="Create" class="btn-new">
+        <i class="bi bi-person-plus-fill"></i> Registrar Usuario
+    </a>
+</div>
+
+<!-- CARD PRINCIPAL -->
+<div class="dir-card">
+
+    <!-- Toolbar: buscador + contador -->
+    <div class="dir-toolbar">
+        <div class="search-wrap">
+            <i class="bi bi-search"></i>
+            <input type="text" class="search-input" id="searchInput"
+                   placeholder="Buscar por nombre, documento, cargo…"
+                   oninput="filtrarTabla()" />
+        </div>
+        <span class="result-count" id="resultCount"></span>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-responsive">
+        <table class="dir-table" id="dirTable">
+            <thead>
+                <tr>
+                    <th>Colaborador</th>
+                    <th>Documento</th>
+                    <th>Cargo / Área</th>
+                    <th>Estado</th>
+                    <th style="text-align:right; padding-right:24px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="dirBody">
+                @{
+                    var lista = Model.ToList();
+                    int total = lista.Count;
+                }
+                @foreach (var item in lista)
+                {
+                    /* ── Iniciales avatar ── */
+                    var ini = ((item.Nombres?.Length > 0 ? item.Nombres[0].ToString() : "") +
+                    (item.PrimerApellido?.Length > 0 ? item.PrimerApellido[0].ToString() : "")).ToUpper();
+
+                    /* ── Clase de badge ── */
+                    string badgeClass;
+                    string textoEstado;
+                    if (item.Estado)
+                    {
+                        badgeClass = "badge-activo";
+                        textoEstado = "Activo";
+                    }
+                    else
+                    {
+                        badgeClass = "badge-bloqueado";
+                        textoEstado = "Bloqueado";
+                    }
+
+                    <tr class="dir-row">
+                        <!-- Colaborador -->
+                        <td>
+                            <div class="collab-wrap">
+                                <div class="collab-avatar">@ini</div>
+                                <div>
+                                    <div class="collab-name">
+                                        @item.PrimerApellido @item.SegundoApellido, @item.Nombres
+                                    </div>
+                                    <div class="collab-email">
+                                        @(item.CorreoPrincipal ?? "Sin correo registrado")
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Documento -->
+                        <td>
+                            <span class="doc-chip">
+                                <i class="bi bi-card-text"></i>
+                                @item.TipoDocumento: @item.NumeroDocumento
+                            </span>
+                        </td>
+
+                        <!-- Cargo / Área -->
+                        <td>
+                            <div class="cargo-name">@(item.Cargo ?? "Sin asignar")</div>
+                            <div class="area-name">@(item.Area ?? "Sin área")</div>
+                        </td>
+
+                        <!-- Estado -->
+                        <td>
+                            <span class="status-badge @badgeClass">
+                                <span class="dot"></span>
+                                @textoEstado
+                            </span>
+                        </td>
+
+                        <!-- Acciones -->
+                        <td style="text-align:right;">
+                            <div class="d-flex justify-content-end gap-1">
+                                <a asp-action="Details" asp-route-id="@item.Id"
+                                   class="action-btn view" title="Ver perfil">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id"
+                                   class="action-btn edit" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (item.Estado)
+                                {
+                                    <button type="button" class="action-btn del" title="Desactivar"
+                                            onclick="abrirModalDesactivar(@item.Id, '@item.Nombres @item.PrimerApellido')">
+                                        <i class="bi bi-person-x"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="action-btn del" title="Usuario ya desactivado" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                        <i class="bi bi-person-x"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Empty state (se muestra con JS si no hay resultados) -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <i class="bi bi-people"></i>
+            <p>No se encontraron usuarios con ese criterio.</p>
+        </div>
+    </div>
+
+    <!-- Pie de tabla -->
+    <div class="dir-footer">
+        <span id="footerInfo">
+            Mostrando <strong id="visibleCount">@total</strong>
+            de <strong>@total</strong> usuarios registrados
+        </span>
+        <span>
+            <i class="bi bi-shield-check me-1" style="color:#22c55e;"></i>
+            Sistema de Gestión de Usuarios · CEPLAN
+        </span>
+    </div>
+
+</div>
+
+<!-- Modal Confirmación Desactivar -->
+<div class="modal fade" id="deactivateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i> Confirmar Desactivación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-secondary mb-0">¿Está seguro que desea desactivar al usuario <strong id="deactivateUserName"></strong>?</p>
+                <p class="text-secondary small mt-1">El usuario ya no podrá iniciar sesión en el sistema.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deactivateForm" method="post" action="/Usuarios/Deactivate">
+                    <input type="hidden" name="id" id="deactivateUserId" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger px-4">Sí, desactivar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    /* ════════════════════════════════════
+       MODAL DE DESACTIVACIÓN
+    ════════════════════════════════════ */
+    function abrirModalDesactivar(id, nombre) {
+        document.getElementById('deactivateUserId').value = id;
+        document.getElementById('deactivateUserName').textContent = nombre;
+        var modal = new bootstrap.Modal(document.getElementById('deactivateModal'));
+        modal.show();
+    }
+
+    /* ════════════════════════════════════
+       BÚSQUEDA EN TIEMPO REAL
+    ════════════════════════════════════ */
+    function filtrarTabla() {
+        const query      = document.getElementById('searchInput').value.toLowerCase().trim();
+        const filas      = document.querySelectorAll('.dir-row');
+        const emptyState = document.getElementById('emptyState');
+        const countEl    = document.getElementById('resultCount');
+        const visibleEl  = document.getElementById('visibleCount');
+
+        let visibles = 0;
+
+        filas.forEach(fila => {
+            const texto = fila.textContent.toLowerCase();
+            const match = texto.includes(query);
+            fila.style.display = match ? '' : 'none';
+            if (match) visibles++;
+        });
+
+        // Empty state
+        emptyState.style.display = visibles === 0 ? 'flex' : 'none';
+
+        // Contador
+        visibleEl.textContent = visibles;
+        countEl.textContent   = query
+            ? `${visibles} resultado${visibles !== 1 ? 's' : ''}`
+            : '';
+    }
+
+    /* Inicializar contador al cargar */
+    document.addEventListener('DOMContentLoaded', () => {
+        const total = document.querySelectorAll('.dir-row').length;
+        document.getElementById('visibleCount').textContent = total;
+    });
+</script>
+}

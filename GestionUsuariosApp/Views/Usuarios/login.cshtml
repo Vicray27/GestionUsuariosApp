@@ -1,0 +1,831 @@
+@{
+    ViewData["Title"] = "Gestión de usuarios";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* ── Navbar ── */
+        .top-navbar {
+            background-color: #9b1c1c;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+            .top-navbar .help-icon {
+                color: #fff;
+                font-size: 1.3rem;
+                cursor: pointer;
+                opacity: 0.9;
+                transition: opacity .2s, transform .2s;
+            }
+
+                .top-navbar .help-icon:hover {
+                    opacity: 1;
+                    transform: scale(1.15);
+                }
+
+        /* ── Fondo ── */
+        .page-bg {
+            min-height: 100vh;
+            padding-top: 52px;
+            background: linear-gradient(160deg, #f5f5f5 60%, #e8e8e8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .page-bg::before {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 55%;
+                background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23d1d5db' fill-opacity='0.35' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,165.3C960,171,1056,213,1152,218.7C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom center / cover;
+                pointer-events: none;
+            }
+
+        /* ── Card ── */
+        .login-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+            width: 100%;
+            max-width: 400px;
+            padding: 36px 40px 30px;
+            position: relative;
+            z-index: 10;
+            animation: cardIn .4s ease;
+        }
+
+        @@keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .card-subtitle {
+            font-size: .8rem;
+            color: #9ca3af;
+            margin-bottom: 24px;
+        }
+
+        /* ── Toggle DNI / CE ── */
+        .doc-toggle {
+            display: flex;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 22px;
+            background: #f9fafb;
+        }
+
+            .doc-toggle input[type="radio"] {
+                display: none;
+            }
+
+            .doc-toggle label {
+                flex: 1;
+                text-align: center;
+                padding: 9px 0;
+                font-size: .875rem;
+                font-weight: 600;
+                cursor: pointer;
+                color: #6b7280;
+                background: transparent;
+                transition: background .25s, color .25s;
+                user-select: none;
+            }
+
+            .doc-toggle input[type="radio"]:checked + label {
+                background: #4b5563;
+                color: #fff;
+                border-radius: 6px;
+            }
+
+        /* ── Labels ── */
+        .form-label {
+            font-size: .8rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        /* ── Input groups ── */
+        .input-group-text {
+            background: #f9fafb;
+            border-right: none;
+            color: #9ca3af;
+            transition: color .2s, border-color .2s;
+        }
+
+        .form-control {
+            background: #f9fafb;
+            border-left: none;
+            font-size: .9rem;
+            color: #111827;
+            transition: border-color .2s, background .2s;
+        }
+
+            .form-control::placeholder {
+                color: #c4c9d4;
+            }
+
+            .form-control:focus {
+                box-shadow: none;
+                border-color: #6366f1;
+                background: #fff;
+            }
+
+        .input-group:focus-within .input-group-text,
+        .input-group:focus-within .form-control {
+            border-color: #6366f1;
+            background: #fff;
+        }
+
+        .input-group:focus-within .input-group-text {
+            color: #6366f1;
+        }
+
+        /* ── Estado inválido ── */
+        .input-group.is-invalid .input-group-text,
+        .input-group.is-invalid .form-control {
+            border-color: #ef4444 !important;
+            background: #fff8f8;
+        }
+
+        .input-group.is-invalid .input-group-text {
+            color: #ef4444 !important;
+        }
+
+        .field-error {
+            font-size: .75rem;
+            color: #ef4444;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-height: 18px;
+            animation: fadeIn .2s ease;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Eye button ── */
+        .eye-btn {
+            border-left: none;
+            border-right: 1px solid #e5e7eb;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color .2s;
+            background: #f9fafb;
+        }
+
+            .eye-btn:hover {
+                color: #374151;
+            }
+
+        .input-group:focus-within .eye-btn {
+            border-color: #6366f1;
+            background: #fff;
+        }
+
+        /* ── Link olvidé ── */
+        .forgot-link {
+            font-size: .78rem;
+            color: #2563eb;
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+            .forgot-link:hover {
+                text-decoration: underline;
+                color: #1d4ed8;
+            }
+
+        /* ── Botón Ingresar ── */
+        .btn-ingresar {
+            background: linear-gradient(90deg, #6b8dd6 0%, #7c9fe8 100%);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: .5px;
+            border-radius: 8px;
+            padding: 11px;
+            font-size: .95rem;
+            transition: filter .2s, transform .15s, box-shadow .2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .btn-ingresar:hover:not(:disabled) {
+                filter: brightness(1.08);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(107,141,214,.4);
+                color: #fff;
+            }
+
+            .btn-ingresar:active:not(:disabled) {
+                transform: translateY(0);
+            }
+
+            .btn-ingresar:disabled {
+                opacity: .75;
+                cursor: not-allowed;
+            }
+
+            .btn-ingresar .spinner {
+                display: none;
+                width: 16px;
+                height: 16px;
+                border: 2px solid rgba(255,255,255,.4);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: spin .7s linear infinite;
+                margin-right: 8px;
+            }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-ingresar.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-ingresar.loading .btn-text {
+            opacity: .7;
+        }
+
+        /* ── Soporte ── */
+        .support-box {
+            background: #f0f4ff;
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+            .support-box .support-icon {
+                font-size: 1.8rem;
+                color: #3b82f6;
+                flex-shrink: 0;
+            }
+
+            .support-box p {
+                font-size: .8rem;
+                color: #374151;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            .support-box a {
+                color: #2563eb;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+                .support-box a:hover {
+                    text-decoration: underline;
+                }
+
+        /* ── Toast System ── */
+        .toast-stack {
+            position: fixed;
+            top: 62px;
+            right: 16px;
+            z-index: 1200;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            min-width: 300px;
+            max-width: 360px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            pointer-events: all;
+            animation: toastIn .35s cubic-bezier(.34,1.56,.64,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @@keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(60px) scale(.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @@keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+                max-height: 120px;
+                margin-bottom: 0;
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(60px) scale(.9);
+                max-height: 0;
+                margin-bottom: -10px;
+            }
+        }
+
+        .toast-item.hiding {
+            animation: toastOut .3s ease forwards;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            transform-origin: left;
+        }
+
+        .toast-danger {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-success {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            color: #14532d;
+        }
+
+        .toast-warning {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            color: #78350f;
+        }
+
+        .toast-info {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            color: #1e3a5f;
+        }
+
+        .toast-danger .toast-progress {
+            background: #ef4444;
+        }
+
+        .toast-success .toast-progress {
+            background: #22c55e;
+        }
+
+        .toast-warning .toast-progress {
+            background: #f59e0b;
+        }
+
+        .toast-info .toast-progress {
+            background: #3b82f6;
+        }
+
+        .toast-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .toast-danger .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-success .toast-icon {
+            color: #22c55e;
+        }
+
+        .toast-warning .toast-icon {
+            color: #f59e0b;
+        }
+
+        .toast-info .toast-icon {
+            color: #3b82f6;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            font-size: .85rem;
+            margin-bottom: 2px;
+        }
+
+        .toast-msg {
+            font-size: .8rem;
+            opacity: .85;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: .5;
+            padding: 0;
+            line-height: 1;
+            transition: opacity .2s;
+            color: inherit;
+        }
+
+            .toast-close:hover {
+                opacity: 1;
+            }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Stack -->
+    <div class="toast-stack" id="toastStack"></div>
+
+    <!-- Navbar -->
+    <nav class="top-navbar">
+        <i class="bi bi-question-lg help-icon"
+           title="Ayuda"
+           onclick="showToast('info','¿Necesita ayuda?','Contacte con el área de soporte para asistencia.')">
+        </i>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="page-bg">
+        <div class="login-card">
+
+            <p class="card-title">Bienvenido</p>
+            <p class="card-subtitle">Ingrese sus credenciales para continuar</p>
+
+            <form id="loginForm" asp-action="Login" method="post" novalidate>
+
+                <!-- Toggle tipo documento -->
+                <div class="doc-toggle">
+                    <input type="radio" name="TipoDocumento" id="radioDNI" value="DNI" checked>
+                    <label for="radioDNI">DNI</label>
+                    <input type="radio" name="TipoDocumento" id="radioCE" value="CE">
+                    <label for="radioCE">CE</label>
+                </div>
+
+                <!-- Número de documento -->
+                <div class="mb-3">
+                    <label class="form-label" for="inputUsuario">Número de documento</label>
+                    <div class="input-group" id="groupUsuario">
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i>
+                        </span>
+                        <input type="text"
+                               id="inputUsuario"
+                               name="NumeroDocumento"
+                               class="form-control"
+                               placeholder="Ej. 12345678"
+                               autocomplete="username"
+                               maxlength="12" />
+                    </div>
+                    <div class="field-error" id="errorUsuario"></div>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="mb-1">
+                    <label class="form-label" for="inputPassword">Contraseña</label>
+                    <div class="input-group" id="groupContrasena">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock"></i>
+                        </span>
+                        <input type="password"
+                               id="inputPassword"
+                               name="Contrasena"
+                               class="form-control"
+                               placeholder="••••••••"
+                               autocomplete="current-password"
+                               maxlength="12" />
+                        <span class="input-group-text eye-btn"
+                              onclick="togglePassword()"
+                              title="Mostrar/ocultar contraseña">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </span>
+                    </div>
+                    <div class="field-error" id="errorContrasena"></div>
+                </div>
+
+                <div class="mb-4 mt-2 text-end">
+                    <a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-ingresar" id="btnIngresar">
+                        <span class="spinner" id="btnSpinner"></span>
+                        <span class="btn-text">Ingresar</span>
+                    </button>
+                </div>
+
+            </form>
+
+            <div class="support-box">
+                <i class="bi bi-headset support-icon"></i>
+                <p>¿Necesita ayuda? <a href="#">Contacte con el área de soporte.</a></p>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /* ═══════════════════════════════════════
+           TOAST SYSTEM
+        ═══════════════════════════════════════ */
+        const TOAST_ICONS = {
+            danger:  'bi-x-octagon-fill',
+            success: 'bi-check-circle-fill',
+            warning: 'bi-exclamation-triangle-fill',
+            info:    'bi-info-circle-fill'
+        };
+
+        const TOAST_TITLES = {
+            danger:  'Error',
+            success: '¡Éxito!',
+            warning: 'Advertencia',
+            info:    'Información'
+        };
+
+        function showToast(type = 'danger', title = '', message = '', duration = 4500) {
+            const stack         = document.getElementById('toastStack');
+            const resolvedTitle = title || TOAST_TITLES[type] || 'Aviso';
+            const icon          = TOAST_ICONS[type] || 'bi-bell-fill';
+
+            const item = document.createElement('div');
+            item.className = `toast-item toast-${type}`;
+            item.innerHTML = `
+                <i class="bi ${icon} toast-icon"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${resolvedTitle}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this.parentElement)">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="toast-progress"></div>`;
+
+            stack.appendChild(item);
+
+            const prog = item.querySelector('.toast-progress');
+            prog.style.transition = `transform ${duration}ms linear`;
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                prog.style.transform = 'scaleX(0)';
+            }));
+
+            item._timer = setTimeout(() => closeToast(item), duration);
+            item.addEventListener('mouseenter', () => clearTimeout(item._timer));
+            item.addEventListener('mouseleave', () => {
+                item._timer = setTimeout(() => closeToast(item), 1500);
+            });
+        }
+
+        function closeToast(item) {
+            if (!item || item.classList.contains('hiding')) return;
+            clearTimeout(item._timer);
+            item.classList.add('hiding');
+            item.addEventListener('animationend', () => item.remove(), { once: true });
+        }
+
+        /* ═══════════════════════════════════════
+           REFERENCIAS
+        ═══════════════════════════════════════ */
+        const inputUsuario    = document.getElementById('inputUsuario');
+        const inputPassword   = document.getElementById('inputPassword');
+        const groupUsuario    = document.getElementById('groupUsuario');
+        const groupContrasena = document.getElementById('groupContrasena');
+        const errUsuario      = document.getElementById('errorUsuario');
+        const errContrasena   = document.getElementById('errorContrasena');
+
+        /* ── Helpers ── */
+        function setError(group, errEl, msg) {
+            group.classList.add('is-invalid');
+            errEl.innerHTML = `<i class="bi bi-exclamation-circle-fill"></i> ${msg}`;
+        }
+
+        function clearError(group, errEl) {
+            group.classList.remove('is-invalid');
+            errEl.innerHTML = '';
+        }
+
+        /* ═══════════════════════════════════════
+           VALIDACIONES LOGIN
+           Solo verificamos que los campos no
+           estén vacíos y tengan el formato básico.
+           El servidor decide si las credenciales
+           son correctas.
+        ═══════════════════════════════════════ */
+
+        /* -- Documento -- */
+        function validateDocumento(show = false) {
+            const val  = inputUsuario.value.trim();
+
+            if (!val) {
+                if (show) setError(groupUsuario, errUsuario, 'Ingrese su número de documento.');
+                return false;
+            }
+
+            clearError(groupUsuario, errUsuario);
+            return true;
+        }
+
+        /* -- Contraseña -- */
+        function validateContrasena(show = false) {
+            const val = inputPassword.value;
+
+            if (!val) {
+                if (show) setError(groupContrasena, errContrasena, 'Ingrese su contraseña.');
+                return false;
+            }
+
+            clearError(groupContrasena, errContrasena);
+            return true;
+        }
+
+        /* ── Eventos en tiempo real ── */
+        inputUsuario.addEventListener('input', () => {
+            const tipo = document.querySelector('input[name="TipoDocumento"]:checked').value;
+            // DNI solo números
+            if (tipo === 'DNI') inputUsuario.value = inputUsuario.value.replace(/\D/g, '');
+            if (inputUsuario.value) validateDocumento();
+            else clearError(groupUsuario, errUsuario);
+        });
+
+        inputUsuario.addEventListener('blur', () => validateDocumento(true));
+
+        inputPassword.addEventListener('input', () => {
+            if (inputPassword.value) validateContrasena();
+            else clearError(groupContrasena, errContrasena);
+        });
+
+        inputPassword.addEventListener('blur', () => validateContrasena(true));
+
+        /* ── Cambio de tipo documento ── */
+        document.querySelectorAll('input[name="TipoDocumento"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const tipo = radio.value;
+                inputUsuario.placeholder = tipo === 'DNI' ? 'Ej. 12345678' : 'Ej. A12345678';
+                inputUsuario.value       = '';
+                clearError(groupUsuario, errUsuario);
+            });
+        });
+
+        /* ═══════════════════════════════════════
+           SUBMIT
+        ═══════════════════════════════════════ */
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            const validDoc  = validateDocumento(true);
+            const validPass = validateContrasena(true);
+
+            if (!validDoc || !validPass) {
+                e.preventDefault();
+
+                if (!validDoc && !validPass) {
+                    showToast('warning', 'Campos vacíos', 'Complete su documento y contraseña para continuar.');
+                } else if (!validDoc) {
+                    showToast('danger', 'Documento inválido', errUsuario.textContent.trim());
+                } else {
+                    showToast('danger', 'Contraseña inválida', errContrasena.textContent.trim());
+                }
+                return;
+            }
+
+            /* Spinner */
+            const btn = document.getElementById('btnIngresar');
+            btn.classList.add('loading');
+            btn.disabled = true;
+            document.querySelector('.btn-text').textContent = 'Verificando...';
+        });
+
+        /* ═══════════════════════════════════════
+           TOGGLE PASSWORD
+        ═══════════════════════════════════════ */
+        function togglePassword() {
+            const input  = document.getElementById('inputPassword');
+            const icon   = document.getElementById('eyeIcon');
+            const hidden = input.type === 'password';
+            input.type   = hidden ? 'text' : 'password';
+            icon.classList.replace(
+                hidden ? 'bi-eye' : 'bi-eye-slash',
+                hidden ? 'bi-eye-slash' : 'bi-eye'
+            );
+        }
+
+        /* ═══════════════════════════════════════
+           ERRORES DEL SERVIDOR
+           Cualquier error de credenciales se
+           muestra como "Usuario o contraseña
+           incorrectos" sin revelar cuál falló.
+        ═══════════════════════════════════════ */
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Error de credenciales (servidor)
+            const errCred = '@Html.Raw(ViewBag.ErrorCredenciales ?? "")'.trim();
+            if (errCred) {
+                // Marcar ambos campos visualmente
+                setError(groupUsuario,    errUsuario,    '');
+                setError(groupContrasena, errContrasena, '');
+                showToast('danger', 'Acceso denegado', errCred, 6000);
+            }
+
+            // Error de usuario específico (si el servidor lo envía)
+            const errU = '@Html.Raw(ViewBag.ErrorUsuario ?? "")'.trim();
+            if (errU) {
+                setError(groupUsuario, errUsuario, errU);
+                showToast('danger', 'Datos incorrectos', 'Verifique su usuario o contraseña e intente nuevamente.', 6000);
+            }
+
+            // Error general (cuenta bloqueada, sin acceso, etc.)
+            const errG = '@Html.Raw(ViewBag.ErrorGeneral ?? "")'.trim();
+            if (errG) {
+                showToast('danger', 'Error de acceso', errG, 6000);
+            }
+
+            // Mensaje de éxito (ej. cierre de sesión)
+            const ok = '@Html.Raw(ViewBag.Mensaje ?? "")'.trim();
+            if (ok) showToast('success', '¡Listo!', ok, 4000);
+
+            // Sesión expirada
+            const expired = '@(ViewBag.SessionExpired == true ? "true" : "false")';
+            if (expired === 'true') {
+                showToast('warning', 'Sesión expirada', 'Su sesión expiró por inactividad. Ingrese nuevamente.', 6000);
+            }
+        });
+    </script>
+
+</body>
+</html>

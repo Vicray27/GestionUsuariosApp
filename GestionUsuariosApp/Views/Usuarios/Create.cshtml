@@ -1,0 +1,207 @@
+@model GestionUsuariosApp.Models.Usuario
+
+@{
+    ViewData["Title"] = "Registrar Usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .breadcrumb-text {
+        font-size: .78rem; color: #9ca3af;
+        margin-bottom: 4px; display: flex;
+        align-items: center; gap: 6px;
+    }
+
+    .page-title {
+        font-size: 1.4rem; font-weight: 700;
+        color: #1f2937; margin-bottom: 22px;
+    }
+
+    .dir-card {
+        background: #fff; border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        padding: 28px; animation: cardIn .35s ease;
+    }
+
+    @@keyframes cardIn {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-label {
+        font-size: .75rem; font-weight: 600;
+        color: #6b7280; margin-bottom: 5px; display: block;
+    }
+
+    .form-control, .form-select {
+        font-size: .88rem; color: #1f2937;
+        border: 1px solid #e5e7eb; border-radius: 8px;
+        padding: 9px 12px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        box-shadow: none; border-color: #6b8dd6;
+    }
+
+    .btn-new {
+        background: linear-gradient(90deg, #6b8dd6 0%, #7c9fe8 100%);
+        border: none; color: #fff; font-weight: 700;
+        border-radius: 8px; padding: 9px 18px; font-size: .88rem;
+        transition: filter .2s, transform .15s, box-shadow .2s;
+        display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+        text-decoration: none; white-space: nowrap;
+    }
+    .btn-new:hover {
+        filter: brightness(1.08); transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(107,141,214,.4); color: #fff;
+    }
+    .btn-new:active { transform: translateY(0); }
+</style>
+
+<div class="breadcrumb-text">
+    <a asp-action="Index" class="text-decoration-none text-muted"><i class="bi bi-folder2-open me-1"></i> Directorio</a>
+    <i class="bi bi-chevron-right" style="font-size:.65rem;"></i>
+    Nuevo usuario
+</div>
+
+<h4 class="page-title">Registrar Nuevo Usuario</h4>
+
+<div class="dir-card">
+    <form asp-action="Create" method="post" id="createForm" novalidate>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <label class="form-label">Tipo de Documento</label>
+                <select asp-for="TipoDocumento" id="TipoDocumento" class="form-select" required>
+                    <option value="DNI">DNI</option>
+                    <option value="CE">CE</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Número de Documento (Usuario)</label>
+                <input asp-for="NumeroDocumento" id="inputNumDoc" class="form-control" placeholder="Ej. 7079879" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Contraseña de Acceso</label>
+                <input asp-for="Contrasena" id="inputPass" type="password" class="form-control" placeholder="••••••••" required />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Nombres</label>
+                <input asp-for="Nombres" id="inputNombres" class="form-control" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Primer Apellido</label>
+                <input asp-for="PrimerApellido" id="inputApellido1" class="form-control" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Segundo Apellido</label>
+                <input asp-for="SegundoApellido" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Cargo</label>
+                <input asp-for="Cargo" class="form-control" placeholder="Ej. Administrador de Recursos" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Área</label>
+                <input asp-for="Area" class="form-control" placeholder="Ej. Oficina de Tecnología" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Correo Electrónico</label>
+                <input asp-for="CorreoPrincipal" type="email" class="form-control" placeholder="ejemplo@minsa.gob.pe" />
+            </div>
+
+            <input type="hidden" asp-for="Estado" value="true" />
+            <input type="hidden" asp-for="CVF" value="0" />
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+            <a asp-action="Index" class="btn btn-light border px-4">Cancelar</a>
+            <button type="submit" class="btn-new px-4" id="btnGuardar">
+                <span id="btnText">Guardar Registro</span>
+                <span id="btnSpinner" class="d-none">
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Guardando...
+                </span>
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('createForm');
+            const btn = document.getElementById('btnGuardar');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const tipoDoc = document.getElementById('TipoDocumento');
+            const inputNumDoc = document.getElementById('inputNumDoc');
+
+            // Limpiar letras si es DNI
+            inputNumDoc.addEventListener('input', function() {
+                if (tipoDoc.value === 'DNI') {
+                    this.value = this.value.replace(/\D/g, '');
+                }
+            });
+
+            // Si cambia el tipo, se borra el valor para evitar inconsistencias
+            tipoDoc.addEventListener('change', function() {
+                inputNumDoc.value = '';
+                inputNumDoc.placeholder = this.value === 'DNI' ? 'Ej. 7079879' : 'Ej. A1234567';
+            });
+
+            // Si hay errores del modelo (vienen del servidor)
+            const hasErrors = '@(!ViewData.ModelState.IsValid)'.toLowerCase() === 'true';
+            if (hasErrors) {
+                if(typeof showToast === 'function') showToast('danger', 'Error de validación', 'Revise los campos del formulario. Asegúrese de completar los datos obligatorios.');
+            }
+
+            form.addEventListener('submit', function (e) {
+                // Validación básica cliente
+                const reqFields = [
+                    { id: 'inputNumDoc', msg: 'El número de documento es obligatorio.' },
+                    { id: 'inputPass', msg: 'La contraseña es obligatoria.' },
+                    { id: 'inputNombres', msg: 'El nombre es obligatorio.' },
+                    { id: 'inputApellido1', msg: 'El primer apellido es obligatorio.' }
+                ];
+
+                let invalid = false;
+                for (let f of reqFields) {
+                    const el = document.getElementById(f.id);
+                    if (!el.value.trim()) {
+                        el.classList.add('is-invalid');
+                        if (!invalid && typeof showToast === 'function') {
+                            showToast('warning', 'Campos incompletos', f.msg);
+                        }
+                        invalid = true;
+                    } else {
+                        el.classList.remove('is-invalid');
+                    }
+                }
+
+                if (invalid) {
+                    e.preventDefault();
+                    // Efecto shake
+                    form.classList.add('shake');
+                    setTimeout(() => form.classList.remove('shake'), 400);
+                    return false;
+                }
+
+                // Loading state
+                btn.disabled = true;
+                btnText.classList.add('d-none');
+                btnSpinner.classList.remove('d-none');
+            });
+        });
+    </script>
+    <style>
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .shake { animation: shake 0.4s ease-in-out; }
+        .is-invalid { border-color: #dc3545 !important; background-color: #fff8f8 !important; }
+    </style>
+}

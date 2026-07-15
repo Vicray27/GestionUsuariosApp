@@ -1,0 +1,502 @@
+﻿@{
+    ViewData["Title"] = "Cuenta Bloqueada";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* ── Navbar ── */
+        .top-navbar {
+            background-color: #9b1c1c;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+            .top-navbar .help-icon {
+                color: #fff;
+                font-size: 1.3rem;
+                cursor: pointer;
+                opacity: 0.9;
+                transition: opacity .2s, transform .2s;
+            }
+
+                .top-navbar .help-icon:hover {
+                    opacity: 1;
+                    transform: scale(1.15);
+                }
+
+        /* ── Fondo ── */
+        .page-bg {
+            min-height: 100vh;
+            padding-top: 52px;
+            background: linear-gradient(160deg, #f5f5f5 60%, #e8e8e8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .page-bg::before {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 55%;
+                background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23d1d5db' fill-opacity='0.35' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,165.3C960,171,1056,213,1152,218.7C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom center / cover;
+                pointer-events: none;
+            }
+
+        /* ── Card ── */
+        .lock-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+            width: 100%;
+            max-width: 400px;
+            padding: 36px 40px 30px;
+            position: relative;
+            z-index: 10;
+            animation: cardIn .4s ease;
+        }
+
+        @@keyframes cardIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* ── Ícono central ── */
+        .lock-icon-wrap {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+            .lock-icon-wrap i {
+                font-size: 2rem;
+                color: #9b1c1c;
+            }
+
+        /* ── Títulos (mismos que login-card) ── */
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .card-subtitle {
+            font-size: .8rem;
+            color: #9ca3af;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* ── Caja de información ── */
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-left: 4px solid #9b1c1c;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-size: .82rem;
+            color: #7f1d1d;
+        }
+
+            .info-row i {
+                font-size: 1.1rem;
+                flex-shrink: 0;
+            }
+
+        /* ── Caja de contador ── */
+        .timer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f0f4ff;
+            border: 1px solid #dbeafe;
+            border-left: 4px solid #6b8dd6;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 24px;
+            font-size: .82rem;
+            color: #1e3a5f;
+        }
+
+            .timer-row .timer-label {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+                .timer-row .timer-label i {
+                    font-size: 1.1rem;
+                    color: #6b8dd6;
+                }
+
+        #countdown {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #9b1c1c;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: .5px;
+        }
+
+        /* ── Botón (igual que btn-ingresar del login) ── */
+        .btn-back {
+            background: linear-gradient(90deg, #6b8dd6 0%, #7c9fe8 100%);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: .5px;
+            border-radius: 8px;
+            padding: 11px;
+            font-size: .95rem;
+            transition: filter .2s, transform .15s, box-shadow .2s;
+            width: 100%;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+        }
+
+            .btn-back:hover {
+                filter: brightness(1.08);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(107,141,214,.4);
+                color: #fff;
+            }
+
+            .btn-back:active {
+                transform: translateY(0);
+            }
+
+        /* ── Soporte (idéntico al login) ── */
+        .support-box {
+            background: #f0f4ff;
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+            .support-box .support-icon {
+                font-size: 1.8rem;
+                color: #3b82f6;
+                flex-shrink: 0;
+            }
+
+            .support-box p {
+                font-size: .8rem;
+                color: #374151;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            .support-box a {
+                color: #2563eb;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+                .support-box a:hover {
+                    text-decoration: underline;
+                }
+
+        /* ── Toast (copiado exacto del login) ── */
+        .toast-stack {
+            position: fixed;
+            top: 62px;
+            right: 16px;
+            z-index: 1200;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            min-width: 300px;
+            max-width: 360px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            pointer-events: all;
+            animation: toastIn .35s cubic-bezier(.34,1.56,.64,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @@keyframes toastIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateX(60px) scale(.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+
+        }
+
+        @@keyframes toastOut {
+            from
+
+        {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            max-height: 120px;
+        }
+
+        to {
+            opacity: 0;
+            transform: translateX(60px) scale(.9);
+            max-height: 0;
+        }
+
+        }
+
+        .toast-item.hiding {
+            animation: toastOut .3s ease forwards;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            transform-origin: left;
+        }
+
+        .toast-info {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            color: #1e3a5f;
+        }
+
+            .toast-info .toast-progress {
+                background: #3b82f6;
+            }
+
+            .toast-info .toast-icon {
+                color: #3b82f6;
+            }
+
+        .toast-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            font-size: .85rem;
+            margin-bottom: 2px;
+        }
+
+        .toast-msg {
+            font-size: .8rem;
+            opacity: .85;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: .5;
+            padding: 0;
+            line-height: 1;
+            transition: opacity .2s;
+            color: inherit;
+        }
+
+            .toast-close:hover {
+                opacity: 1;
+            }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Stack -->
+    <div class="toast-stack" id="toastStack"></div>
+
+    <!-- Navbar -->
+    <nav class="top-navbar">
+        <i class="bi bi-question-lg help-icon"
+           title="Ayuda"
+           onclick="showToast('info','¿Necesita ayuda?','Contacte con el área de soporte para asistencia.')">
+        </i>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="page-bg">
+        <div class="lock-card">
+
+            <!-- Ícono -->
+            <div class="lock-icon-wrap">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+
+            <!-- Títulos -->
+            <p class="card-title">Cuenta bloqueada</p>
+            <p class="card-subtitle">Se ha superado el límite de intentos permitidos</p>
+
+            <!-- Info de bloqueo -->
+            <div class="info-row">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>
+                    Has excedido <strong>5 intentos fallidos</strong>.
+                    Tu cuenta ha sido bloqueada temporalmente por seguridad.
+                </span>
+            </div>
+
+            <!-- Contador regresivo -->
+            <div class="timer-row">
+                <div class="timer-label">
+                    <i class="bi bi-hourglass-split"></i>
+                    <span>Tiempo restante</span>
+                </div>
+                <span id="countdown">15:00</span>
+            </div>
+
+            <!-- Botón volver -->
+            <a asp-action="Login" class="btn-back">
+                <i class="bi bi-arrow-left-circle me-2"></i>Volver al inicio de sesión
+            </a>
+
+            <!-- Soporte -->
+            <div class="support-box">
+                <i class="bi bi-headset support-icon"></i>
+                <p>
+                    ¿Necesita ayuda?
+                    <a href="#">Contacte con el área de soporte.</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /* ── Toast System (mismo del login) ── */
+        function showToast(type = 'info', title = '', message = '', duration = 4500) {
+            const icons  = { info: 'bi-info-circle-fill' };
+            const stack  = document.getElementById('toastStack');
+            const item   = document.createElement('div');
+            item.className = `toast-item toast-${type}`;
+            item.innerHTML = `
+                <i class="bi ${icons[type] ?? 'bi-bell-fill'} toast-icon"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this.parentElement)">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="toast-progress"></div>`;
+
+            stack.appendChild(item);
+            const prog = item.querySelector('.toast-progress');
+            prog.style.transition = `transform ${duration}ms linear`;
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                prog.style.transform = 'scaleX(0)';
+            }));
+
+            item._timer = setTimeout(() => closeToast(item), duration);
+            item.addEventListener('mouseenter', () => clearTimeout(item._timer));
+            item.addEventListener('mouseleave', () => {
+                item._timer = setTimeout(() => closeToast(item), 1500);
+            });
+        }
+
+        function closeToast(item) {
+            if (!item || item.classList.contains('hiding')) return;
+            clearTimeout(item._timer);
+            item.classList.add('hiding');
+            item.addEventListener('animationend', () => item.remove(), { once: true });
+        }
+
+        /* ── Contador regresivo 15 min ── */
+        (function () {
+            let total = 15 * 60;
+            const el  = document.getElementById('countdown');
+
+            const tick = () => {
+                const m = String(Math.floor(total / 60)).padStart(2, '0');
+                const s = String(total % 60).padStart(2, '0');
+                el.textContent = `${m}:${s}`;
+
+                if (total <= 0) return;
+                total--;
+                setTimeout(tick, 1000);
+            };
+            tick();
+        })();
+    </script>
+
+</body>
+</html>

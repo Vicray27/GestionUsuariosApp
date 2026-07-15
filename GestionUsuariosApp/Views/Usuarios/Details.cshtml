@@ -1,0 +1,439 @@
+@model GestionUsuariosApp.Models.Usuario
+
+@{
+    ViewData["Title"] = "Perfil de usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ══════════════════════════════════
+           TÍTULOS (Estilo Figma)
+       ══════════════════════════════════ */
+    .breadcrumb-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 2px;
+    }
+    .page-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 24px;
+        letter-spacing: -0.5px;
+    }
+
+    /* ══════════════════════════════════
+           CARD PRINCIPAL
+       ══════════════════════════════════ */
+    .profile-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        overflow: hidden;
+        animation: cardIn .35s ease;
+    }
+    @@keyframes cardIn {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════════════════════════════════
+           CABECERA DEL PERFIL (HEADER)
+       ══════════════════════════════════ */
+    .profile-head {
+        padding: 30px 40px 10px 40px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #dbeafe; /* Celeste Figma */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .avatar-circle i {
+        font-size: 3rem;
+        color: #60a5fa; /* Azul Figma */
+        margin-top: -5px; /* Centrado óptico */
+    }
+
+    .profile-head-info h5 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .status-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 4px;
+        background: #dcfce7;
+        color: #166534;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
+    }
+    .status-badge.blocked {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+    .profile-head-info p {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin: 0 0 2px 0;
+    }
+
+    /* ══════════════════════════════════
+           TABS
+       ══════════════════════════════════ */
+    .profile-tabs {
+        padding: 0 40px;
+        border-bottom: 1px solid #e5e7eb;
+        margin-top: 15px;
+    }
+    .profile-tabs .nav-link {
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: #9ca3af;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 12px 0;
+        margin-right: 50px;
+        background: none;
+        border-radius: 0;
+        transition: color .2s, border-color .2s;
+    }
+    .profile-tabs .nav-link:hover {
+        color: #4b5563;
+    }
+    .profile-tabs .nav-link.active {
+        color: #2563eb;
+        border-bottom-color: #2563eb;
+    }
+
+    /* ══════════════════════════════════
+           FORMULARIO READONLY / EDITABLE
+       ══════════════════════════════════ */
+    .tab-body {
+        padding: 30px 40px;
+    }
+    .form-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .form-label .optional {
+        font-weight: 400;
+        color: #9ca3af;
+    }
+    .form-control {
+        font-size: 0.85rem;
+        color: #1f2937;
+        background: #f9fafb;
+        border: 1px solid #f3f4f6; /* Borde sútil tipo Figma */
+        border-radius: 6px;
+        padding: 10px 14px;
+        width: 100%;
+        transition: all .2s;
+    }
+    .form-control:read-only {
+        background: #f9fafb;
+        color: #4b5563;
+        cursor: default;
+    }
+    .form-control.editable {
+        background: #fff;
+        border-color: #d1d5db;
+        cursor: text;
+    }
+    .form-control.editable:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        border-color: #6366f1;
+        background: #fff;
+    }
+
+    /* ── Edit Group (Botones) ── */
+    .edit-group {
+        position: relative;
+    }
+    .edit-group .form-control {
+        padding-right: 40px;
+    }
+    .edit-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #60a5fa;
+        font-size: 1rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        transition: color .2s;
+    }
+    .edit-btn:hover {
+        color: #2563eb;
+    }
+
+    /* ── Selects ── */
+    .form-select {
+        font-size: 0.85rem;
+        color: #4b5563;
+        background-color: #f9fafb;
+        border: 1px solid #f3f4f6;
+        border-radius: 6px;
+        padding: 10px 14px;
+    }
+    .form-select:disabled {
+        opacity: 1;
+        cursor: default;
+    }
+
+    /* ══════════════════════════════════
+           OTRAS UTILIDADES
+       ══════════════════════════════════ */
+    .lock-alert {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        border-radius: 6px;
+        padding: 16px;
+        margin-top: 24px;
+        display: none;
+        gap: 12px;
+    }
+    .lock-alert.show { display: flex; }
+    .cvf-meter { height: 6px; background: #f3f4f6; border-radius: 6px; overflow: hidden; margin-top: 8px; }
+    .cvf-meter-fill { height: 100%; border-radius: 6px; transition: width .4s ease; }
+    .empty-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: #9ca3af; gap: 10px; }
+</style>
+
+<div class="breadcrumb-text mb-2 d-flex align-items-center gap-1">
+    <a asp-action="Index" class="text-decoration-none text-muted"><i class="bi bi-folder2-open me-1"></i> Directorio</a>
+    <i class="bi bi-chevron-right" style="font-size:.65rem;"></i>
+    Perfil de usuario
+</div>
+
+<div class="d-flex align-items-center mb-4">
+    <a asp-action="Index" class="btn btn-light border rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; color: #4b5563;" title="Volver al directorio">
+        <i class="bi bi-arrow-left fs-5"></i>
+    </a>
+    <h2 class="page-title mb-0">Perfil de usuario</h2>
+</div>
+
+<div class="profile-card">
+    <div class="profile-head">
+        <div class="avatar-circle">
+            <i class="bi bi-person-fill"></i>
+        </div>
+        <div class="profile-head-info">
+            <h5>
+                @Model.PrimerApellido @Model.SegundoApellido, @Model.Nombres
+                <span class="status-badge @(Model.Estado ? "" : "blocked")">
+                    @(Model.Estado ? "Activo" : "Bloqueado")
+                </span>
+            </h5>
+            <p>@(Model.Cargo ?? "Administrador de Recursos")</p>
+            <p>@(Model.Area ?? "011 Ministerio de Salud")</p>
+        </div>
+    </div>
+
+    <div class="profile-tabs">
+        <ul class="nav" id="profileTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabBasic" type="button">Información básica</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSeguridad" type="button">Seguridad de cuenta</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabLog" type="button">Historial de responsabilidades</button></li>
+        </ul>
+    </div>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active tab-body" id="tabBasic">
+            <div class="row g-4">
+                <div class="col-md-4"><label class="form-label">Nombres</label><input class="form-control" value="@Model.Nombres" readonly /></div>
+                <div class="col-md-4"><label class="form-label">Primer Apellido</label><input class="form-control" value="@Model.PrimerApellido" readonly /></div>
+                <div class="col-md-4"><label class="form-label">Segundo Apellido</label><input class="form-control" value="@(Model.SegundoApellido ?? "—")" readonly /></div>
+
+                <div class="col-md-4"><label class="form-label">Tipo de Documento</label><input class="form-control" value="@Model.TipoDocumento" readonly /></div>
+                <div class="col-md-4"><label class="form-label">N° de Documento</label><input class="form-control" value="@Model.NumeroDocumento" readonly /></div>
+                <div class="col-md-4"><label class="form-label">Estado de cuenta</label><input class="form-control" value="@(Model.Estado ? "Activo" : "Bloqueado")" readonly /></div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Correo electrónico principal</label>
+                    <div class="edit-group">
+                        <input class="form-control editable" id="correoPrincipal" type="email" value="@(Model.CorreoPrincipal ?? "")" readonly />
+                        <button class="edit-btn" onclick="toggleEdit('correoPrincipal', this)"><i class="bi bi-pencil"></i></button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Teléfono Móvil</label>
+                    <div class="edit-group">
+                        <input class="form-control editable" id="telefonoMovil" value="@(Model.TelefonoMovil ?? "")" oninput="this.value = this.value.replace(/[^0-9+\s-]/g, '')" readonly />
+                        <button class="edit-btn" onclick="toggleEdit('telefonoMovil', this)"><i class="bi bi-pencil"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            @{
+                bool estaBloqueado = !Model.Estado && Model.FechaBloqueo.HasValue;
+            }
+            <div class="lock-alert @(estaBloqueado ? "show" : "")" id="lockAlertBox">
+                <i class="bi bi-shield-exclamation-fill text-danger fs-4"></i>
+                <div>
+                    <h6 class="text-danger fw-bold mb-1">Cuenta bloqueada</h6>
+                    <p class="text-danger opacity-75" style="font-size: 0.8rem;">Desbloqueo en: <span id="lockCountdown">--:--</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade tab-body" id="tabSeguridad">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">Intentos fallidos (CVF)</label>
+                    <input class="form-control" value="@Model.CVF de 5" readonly />
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="tabLog"><div class="empty-tab"><i class="bi bi-card-checklist"></i><p>No hay historial.</p></div></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Se agrega Html.Raw para evitar que Razor codifique las comillas en &quot;
+            iniciarContadorBloqueo(@Html.Raw(Json.Serialize(Model.FechaBloqueo)));
+        });
+        /* ════════════════════════════════════
+                    CONTROL DE EDICIÓN Y VALIDACIONES
+                ════════════════════════════════════ */
+                function toggleEdit(fieldId, btn) {
+                    const input = document.getElementById(fieldId);
+                    const icon = btn.querySelector('i');
+                    const isReadonly = input.readOnly;
+
+                    if (isReadonly) {
+                        // MODO EDICIÓN
+                        input.readOnly = false;
+                        icon.className = 'bi bi-check-lg';
+                        btn.title = 'Guardar cambios';
+                        btn.style.color = '#10b981'; // Verde guardado
+                        input.focus();
+                        input.select();
+                    } else {
+                        // MODO GUARDAR CON VALIDACIONES
+
+                        // 1. Validar vacío
+                        if (!input.value.trim()) {
+                            if(typeof showToast === 'function') showToast('warning', 'Campo requerido', 'No puede dejar este dato en blanco.');
+                            input.focus();
+                            return;
+                        }
+
+                        // 2. Validación estricta para Correo (¡AQUÍ ESTÁ LA CORRECCIÓN DE LAS ARROBAS!)
+                        if (fieldId === 'correoPrincipal') {
+                            const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                            if (!emailRegex.test(input.value)) {
+                                if(typeof showToast === 'function') showToast('danger', 'Formato inválido', 'Ingrese un correo electrónico válido (ej: usuario@minsa.gob.pe).');
+                                input.focus();
+                                return;
+                            }
+                        }
+
+                        // 3. Validación estricta para Teléfono (Longitud mínima)
+                        if (fieldId === 'telefonoMovil') {
+                            const phoneVal = input.value.replace(/[^0-9]/g, '');
+                            if (phoneVal.length < 9) {
+                                if(typeof showToast === 'function') showToast('danger', 'Teléfono incompleto', 'El número debe tener al menos 9 dígitos.');
+                                input.focus();
+                                return;
+                            }
+                        }
+
+                        // MODO DE CARGA
+                        icon.className = 'spinner-border spinner-border-sm';
+                        btn.disabled = true;
+
+                        // GUARDAR LOS CAMBIOS EN EL SERVIDOR (AJAX)
+                        fetch('/Usuarios/UpdateField', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams({
+                                'id': '@Model.Id',
+                                'field': fieldId,
+                                'value': input.value.trim()
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            btn.disabled = false;
+                            if (data.success) {
+                                // Aprobado: Bloquear el input de nuevo
+                                input.readOnly = true;
+                                icon.className = 'bi bi-pencil';
+                                btn.title = 'Editar';
+                                btn.style.color = '';
+                                if(typeof showToast === 'function') showToast('success', 'Dato actualizado', 'Los cambios se han guardado correctamente.');
+                            } else {
+                                icon.className = 'bi bi-check-lg';
+                                if(typeof showToast === 'function') showToast('danger', 'Error', data.message || 'No se pudo actualizar el dato.');
+                                input.focus();
+                            }
+                        })
+                        .catch(err => {
+                            btn.disabled = false;
+                            icon.className = 'bi bi-check-lg';
+                            if(typeof showToast === 'function') showToast('danger', 'Error', 'Ocurrió un error en el servidor al intentar guardar.');
+                            input.focus();
+                        });
+                    }
+                }
+
+        /* ════════════════════════════════════
+            COUNTDOWN DE BLOQUEO EN VIVO
+        ════════════════════════════════════ */
+        function iniciarContadorBloqueo(fechaBloqueoStr) {
+            if (!fechaBloqueoStr) return;
+
+            const fechaBloqueo = new Date(fechaBloqueoStr);
+            let diffMs = fechaBloqueo.getTime() + (15 * 60 * 1000) - Date.now();
+
+            const box = document.getElementById('lockAlertBox');
+            const el = document.getElementById('lockCountdown');
+            if (!el) return;
+
+            if (diffMs <= 0) {
+                if (box) box.classList.remove('show');
+                return;
+            }
+
+            const tick = () => {
+                if (diffMs <= 0) {
+                    el.textContent = '00:00';
+                    setTimeout(() => location.reload(), 800);
+                    return;
+                }
+                const m = String(Math.floor(diffMs / 60000)).padStart(2, '0');
+                const s = String(Math.floor((diffMs % 60000) / 1000)).padStart(2, '0');
+                el.textContent = `${m}:${s}`;
+                diffMs -= 1000;
+                setTimeout(tick, 1000);
+            };
+
+            tick();
+        }
+    </script>
+}
