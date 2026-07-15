@@ -151,6 +151,18 @@
                 inputNumDoc.placeholder = this.value === 'DNI' ? 'Ej. 7079879' : 'Ej. A1234567';
             });
 
+            // Mostrar mensajes de límite de caracteres en inputs
+            document.querySelectorAll('input[data-val-length-max], input[maxlength]').forEach(input => {
+                const max = input.getAttribute('maxlength') || input.getAttribute('data-val-length-max');
+                if(max && input.type !== 'hidden') {
+                    const small = document.createElement('small');
+                    small.className = 'text-muted d-block mt-1';
+                    small.style.fontSize = '0.72rem';
+                    small.innerHTML = `<i class="bi bi-info-circle"></i> Límite: ${max} caracteres.`;
+                    input.parentNode.insertBefore(small, input.nextSibling);
+                }
+            });
+
             // Si hay errores del modelo (vienen del servidor)
             const hasErrors = '@(!ViewData.ModelState.IsValid)'.toLowerCase() === 'true';
             if (hasErrors) {
