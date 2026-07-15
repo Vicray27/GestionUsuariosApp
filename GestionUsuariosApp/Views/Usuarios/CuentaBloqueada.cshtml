@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Cuenta Bloqueada";
     Layout = null;
 }
@@ -108,8 +108,7 @@
             width: 72px;
             height: 72px;
             border-radius: 50%;
-            background: #fef2f2;
-            border: 2px solid #fecaca;
+            background: #eff6ff; /* Fondo azul claro */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -117,142 +116,29 @@
         }
 
             .lock-icon-wrap i {
-                font-size: 2rem;
-                color: #9b1c1c;
+                font-size: 2.5rem;
+                color: #2563eb; /* Azul oscuro */
             }
 
-        /* ── Títulos (mismos que login-card) ── */
+        /* ── Textos ── */
         .card-title {
             font-size: 1.15rem;
             font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 6px;
+            color: #111827;
+            margin-bottom: 12px;
             text-align: center;
         }
 
         .card-subtitle {
-            font-size: .8rem;
-            color: #9ca3af;
-            margin-bottom: 24px;
+            font-size: .85rem;
+            color: #6b7280;
+            margin-bottom: 0;
             text-align: center;
+            line-height: 1.5;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
         }
-
-        /* ── Caja de información ── */
-        .info-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            border-left: 4px solid #9b1c1c;
-            border-radius: 8px;
-            padding: 12px 14px;
-            margin-bottom: 16px;
-            font-size: .82rem;
-            color: #7f1d1d;
-        }
-
-            .info-row i {
-                font-size: 1.1rem;
-                flex-shrink: 0;
-            }
-
-        /* ── Caja de contador ── */
-        .timer-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #f0f4ff;
-            border: 1px solid #dbeafe;
-            border-left: 4px solid #6b8dd6;
-            border-radius: 8px;
-            padding: 12px 14px;
-            margin-bottom: 24px;
-            font-size: .82rem;
-            color: #1e3a5f;
-        }
-
-            .timer-row .timer-label {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-                .timer-row .timer-label i {
-                    font-size: 1.1rem;
-                    color: #6b8dd6;
-                }
-
-        #countdown {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #9b1c1c;
-            font-variant-numeric: tabular-nums;
-            letter-spacing: .5px;
-        }
-
-        /* ── Botón (igual que btn-ingresar del login) ── */
-        .btn-back {
-            background: linear-gradient(90deg, #6b8dd6 0%, #7c9fe8 100%);
-            border: none;
-            color: #fff;
-            font-weight: 700;
-            letter-spacing: .5px;
-            border-radius: 8px;
-            padding: 11px;
-            font-size: .95rem;
-            transition: filter .2s, transform .15s, box-shadow .2s;
-            width: 100%;
-            display: block;
-            text-align: center;
-            text-decoration: none;
-        }
-
-            .btn-back:hover {
-                filter: brightness(1.08);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 18px rgba(107,141,214,.4);
-                color: #fff;
-            }
-
-            .btn-back:active {
-                transform: translateY(0);
-            }
-
-        /* ── Soporte (idéntico al login) ── */
-        .support-box {
-            background: #f0f4ff;
-            border: 1px solid #dbeafe;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 22px;
-        }
-
-            .support-box .support-icon {
-                font-size: 1.8rem;
-                color: #3b82f6;
-                flex-shrink: 0;
-            }
-
-            .support-box p {
-                font-size: .8rem;
-                color: #374151;
-                margin: 0;
-                line-height: 1.5;
-            }
-
-            .support-box a {
-                color: #2563eb;
-                text-decoration: none;
-                font-weight: 600;
-            }
-
-                .support-box a:hover {
-                    text-decoration: underline;
-                }
 
         /* ── Toast (copiado exacto del login) ── */
         .toast-stack {
@@ -281,36 +167,28 @@
             overflow: hidden;
         }
 
-        @@keyframes toastIn {
-            from
-
-        {
-            opacity: 0;
-            transform: translateX(60px) scale(.95);
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(60px) scale(.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
         }
 
-        to {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-        }
-
-        }
-
-        @@keyframes toastOut {
-            from
-
-        {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-            max-height: 120px;
-        }
-
-        to {
-            opacity: 0;
-            transform: translateX(60px) scale(.9);
-            max-height: 0;
-        }
-
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+                max-height: 120px;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(60px) scale(.9);
+                max-height: 0;
+            }
         }
 
         .toast-item.hiding {
@@ -388,7 +266,7 @@
     <nav class="top-navbar">
         <i class="bi bi-question-lg help-icon"
            title="Ayuda"
-           onclick="showToast('info','¿Necesita ayuda?','Contacte con el área de soporte para asistencia.')">
+           onclick="showToast('info','Soporte Técnico','Para asistencia, comuníquese a soporte@test.com')">
         </i>
     </nav>
 
@@ -398,44 +276,16 @@
 
             <!-- Ícono -->
             <div class="lock-icon-wrap">
-                <i class="bi bi-shield-lock-fill"></i>
+                <i class="bi bi-person-lock"></i>
             </div>
 
             <!-- Títulos -->
-            <p class="card-title">Cuenta bloqueada</p>
-            <p class="card-subtitle">Se ha superado el límite de intentos permitidos</p>
-
-            <!-- Info de bloqueo -->
-            <div class="info-row">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <span>
-                    Has excedido <strong>5 intentos fallidos</strong>.
-                    Tu cuenta ha sido bloqueada temporalmente por seguridad.
-                </span>
-            </div>
-
-            <!-- Contador regresivo -->
-            <div class="timer-row">
-                <div class="timer-label">
-                    <i class="bi bi-hourglass-split"></i>
-                    <span>Tiempo restante</span>
-                </div>
-                <span id="countdown">15:00</span>
-            </div>
-
-            <!-- Botón volver -->
-            <a asp-action="Login" class="btn-back">
-                <i class="bi bi-arrow-left-circle me-2"></i>Volver al inicio de sesión
-            </a>
-
-            <!-- Soporte -->
-            <div class="support-box">
-                <i class="bi bi-headset support-icon"></i>
-                <p>
-                    ¿Necesita ayuda?
-                    <a href="#">Contacte con el área de soporte.</a>
-                </p>
-            </div>
+            <p class="card-title">Cuenta bloqueada temporalmente</p>
+            <p class="card-subtitle">
+                Has excedido el número máximo de intentos fallidos (5). 
+                Por seguridad, tu cuenta ha sido bloqueada durante 15 minutos. 
+                Intenta nuevamente más tarde.
+            </p>
 
         </div>
     </div>
@@ -480,22 +330,6 @@
             item.addEventListener('animationend', () => item.remove(), { once: true });
         }
 
-        /* ── Contador regresivo 15 min ── */
-        (function () {
-            let total = 15 * 60;
-            const el  = document.getElementById('countdown');
-
-            const tick = () => {
-                const m = String(Math.floor(total / 60)).padStart(2, '0');
-                const s = String(total % 60).padStart(2, '0');
-                el.textContent = `${m}:${s}`;
-
-                if (total <= 0) return;
-                total--;
-                setTimeout(tick, 1000);
-            };
-            tick();
-        })();
     </script>
 
 </body>

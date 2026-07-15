@@ -104,6 +104,9 @@ namespace GestionUsuariosApp.Controllers
                     _context.Update(usuario);
                     await _context.SaveChangesAsync();
 
+                    // Simulación del envío de correo electrónico de bloqueo (N2)
+                    SimularEnvioCorreoBloqueo(usuario);
+
                     return RedirectToAction(nameof(CuentaBloqueada));
                 }
 
@@ -136,6 +139,52 @@ namespace GestionUsuariosApp.Controllers
         public IActionResult CuentaBloqueada()
         {
             return View();
+        }
+
+        // Método auxiliar para simular el envío de correos (MOCK)
+        private void SimularEnvioCorreoBloqueo(Usuario usuario)
+        {
+            try
+            {
+                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "Emails");
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var fileName = $"Bloqueo_{usuario.NumeroDocumento}_{timestamp}.txt";
+                var filePath = Path.Combine(directoryPath, fileName);
+
+                var correoDestino = string.IsNullOrEmpty(usuario.CorreoPrincipal) ? "SIN_CORREO" : usuario.CorreoPrincipal;
+
+                var contenidoCorreo = $@"
+==================================================
+SIMULACIÓN DE ENVÍO DE CORREO - SISTEMA CEPLAN
+==================================================
+Fecha: {DateTime.Now:dd/MM/yyyy HH:mm:ss}
+Para: {correoDestino}
+Asunto: ALERTA DE SEGURIDAD - Cuenta bloqueada temporalmente
+==================================================
+
+Hola {usuario.Nombres},
+
+Le informamos que se ha excedido el número máximo de intentos fallidos (5) al intentar iniciar sesión en su cuenta.
+Por motivos de seguridad, su acceso ha sido bloqueado temporalmente durante 15 minutos.
+
+Si usted no intentó iniciar sesión, por favor contacte inmediatamente con el área de soporte técnico.
+
+Atentamente,
+El equipo de Seguridad
+==================================================";
+
+                System.IO.File.WriteAllText(filePath, contenidoCorreo);
+            }
+            catch (Exception ex)
+            {
+                // Solo logueamos en consola para que no interrumpa el flujo del usuario si falla el directorio
+                Console.WriteLine($"Error al simular envío de correo: {ex.Message}");
+            }
         }
 
         public async Task<IActionResult> Salir(bool expired = false)
