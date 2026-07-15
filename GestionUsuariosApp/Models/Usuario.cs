@@ -7,33 +7,33 @@ namespace GestionUsuariosApp.Models
     {
         [Key]
         public int Id { get; set; }
-        [StringLength(10)]
+        [StringLength(13)]
         public string TipoDocumento { get; set; } = null!;
-        [StringLength(12)]
+        [StringLength(20)]
         public string NumeroDocumento { get; set; } = null!;
-        [StringLength(100)]
+        [StringLength(12)]
         public string Contrasena { get; set; } = null!;
 
         // Perfil
         [StringLength(50)]
         public string Nombres { get; set; } = null!;
-        [StringLength(50)]
+        [StringLength(20)]
         public string PrimerApellido { get; set; } = null!;
-        [StringLength(50)]
+        [StringLength(20)]
         public string SegundoApellido { get; set; } = null!;
-        [StringLength(50)]
+        [StringLength(30)]
         public string? Cargo { get; set; }
-        [StringLength(50)]
+        [StringLength(30)]
         public string? Area { get; set; }
-        [StringLength(50)]
+        [StringLength(40)]
         public string? Nacionalidad { get; set; }
         [StringLength(20)]
         public string? Sexo { get; set; }
-        [StringLength(100)]
+        [StringLength(25)]
         public string? CorreoPrincipal { get; set; }
         [StringLength(20)]
         public string? TelefonoMovil { get; set; }
-        [StringLength(50)]
+        [StringLength(20)]
         public string? TipoContratacion { get; set; }
         public DateTime? FechaContratacion { get; set; }
 

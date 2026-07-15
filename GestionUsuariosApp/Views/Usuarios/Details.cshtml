@@ -272,10 +272,10 @@
                 <div class="col-md-4">
                     <label class="form-label">Correo electrónico principal</label>
                     <div class="edit-group">
-                        <input class="form-control editable" id="correoPrincipal" type="email" maxlength="100" value="@(Model.CorreoPrincipal ?? "")" readonly />
+                        <input class="form-control editable" id="correoPrincipal" type="email" maxlength="25" value="@(Model.CorreoPrincipal ?? "")" readonly />
                         <button class="edit-btn" onclick="toggleEdit('correoPrincipal', this)"><i class="bi bi-pencil"></i></button>
                     </div>
-                    <small class="text-muted d-block mt-1" style="font-size: 0.72rem;"><i class="bi bi-info-circle"></i> Límite: 100 caracteres.</small>
+                    <small class="text-muted d-block mt-1" style="font-size: 0.72rem;"><i class="bi bi-info-circle"></i> Límite: 25 caracteres.</small>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Teléfono Móvil</label>
