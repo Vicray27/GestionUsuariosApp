@@ -220,7 +220,7 @@ namespace GestionUsuariosApp.Controllers
                     // Si la contraseña viene vacía, mantenemos la anterior
                     if (string.IsNullOrEmpty(usuario.Contrasena))
                     {
-                        usuario.Contrasena = usuarioOriginal.Contrasena;
+                        usuario.Contrasena = usuarioOriginal?.Contrasena;
                     }
 
                     _context.Update(usuario);

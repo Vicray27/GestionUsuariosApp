@@ -23,7 +23,7 @@
         padding: 28px; animation: cardIn .35s ease;
     }
 
-    @keyframes cardIn {
+    @Html.Raw("@keyframes") cardIn {
         from { opacity: 0; transform: translateY(14px); }
         to   { opacity: 1; transform: translateY(0); }
     }
@@ -197,7 +197,7 @@
         });
     </script>
     <style>
-        @keyframes shake {
+        @Html.Raw("@keyframes") shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
