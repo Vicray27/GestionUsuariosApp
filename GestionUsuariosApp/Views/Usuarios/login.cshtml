@@ -582,7 +582,7 @@
                 </div>
 
                 <div class="mb-4 mt-2 text-end">
-                    <a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
+                    <a href="#" class="forgot-link" onclick="showToast('info', 'Recuperar Contraseña', 'Por favor, envíe un correo a soporte@test.com para restablecer su contraseña.'); return false;">¿Olvidó su contraseña?</a>
                 </div>
 
                 <div class="d-grid">
@@ -596,7 +596,7 @@
 
             <div class="support-box">
                 <i class="bi bi-headset support-icon"></i>
-                <p>¿Necesita ayuda? <a href="#">Contacte con el área de soporte.</a></p>
+                <p>¿Necesita ayuda? <a href="#" onclick="showToast('info', 'Soporte Técnico', 'Para asistencia, comuníquese a soporte@test.com'); return false;">Contacte con el área de soporte.</a></p>
             </div>
 
         </div>
