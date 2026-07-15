@@ -253,7 +253,7 @@
     <div class="profile-tabs">
         <ul class="nav" id="profileTabs" role="tablist">
             <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabBasic" type="button">Información básica</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSeguridad" type="button">Seguridad de cuenta</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSeguridad" type="button">Responsabilidades</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabLog" type="button">Historial de responsabilidades</button></li>
         </ul>
     </div>
@@ -265,9 +265,13 @@
                 <div class="col-md-4"><label class="form-label">Primer Apellido</label><input class="form-control" value="@Model.PrimerApellido" readonly /></div>
                 <div class="col-md-4"><label class="form-label">Segundo Apellido</label><input class="form-control" value="@(Model.SegundoApellido ?? "—")" readonly /></div>
 
-                <div class="col-md-4"><label class="form-label">Tipo de Documento</label><input class="form-control" value="@Model.TipoDocumento" readonly /></div>
-                <div class="col-md-4"><label class="form-label">N° de Documento</label><input class="form-control" value="@Model.NumeroDocumento" readonly /></div>
+                <div class="col-md-4"><label class="form-label">Tipo de Documento de Identidad</label><input class="form-control" value="@Model.TipoDocumento" readonly /></div>
+                <div class="col-md-4"><label class="form-label">N° de Documento de Identidad</label><input class="form-control" value="@Model.NumeroDocumento" readonly /></div>
                 <div class="col-md-4"><label class="form-label">Estado de cuenta</label><input class="form-control" value="@(Model.Estado ? "Activo" : "Bloqueado")" readonly /></div>
+
+                <div class="col-md-4"><label class="form-label">Nacionalidad</label><input class="form-control" value="@(Model.Nacionalidad ?? "—")" readonly /></div>
+                <div class="col-md-4"><label class="form-label">Sexo</label><input class="form-control" value="@(Model.Sexo ?? "—")" readonly /></div>
+                <div class="col-md-4"></div> <!-- Espacio vacío para alinear -->
 
                 <div class="col-md-4">
                     <label class="form-label">Correo electrónico principal</label>
@@ -275,7 +279,6 @@
                         <input class="form-control editable" id="correoPrincipal" type="email" maxlength="25" value="@(Model.CorreoPrincipal ?? "")" readonly />
                         <button class="edit-btn" onclick="toggleEdit('correoPrincipal', this)"><i class="bi bi-pencil"></i></button>
                     </div>
-                    <small class="text-muted d-block mt-1" style="font-size: 0.72rem;"><i class="bi bi-info-circle"></i> Límite: 25 caracteres.</small>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Teléfono Móvil</label>
@@ -283,8 +286,11 @@
                         <input class="form-control editable" id="telefonoMovil" maxlength="20" value="@(Model.TelefonoMovil ?? "")" oninput="this.value = this.value.replace(/[^0-9+\s-]/g, '')" readonly />
                         <button class="edit-btn" onclick="toggleEdit('telefonoMovil', this)"><i class="bi bi-pencil"></i></button>
                     </div>
-                    <small class="text-muted d-block mt-1" style="font-size: 0.72rem;"><i class="bi bi-info-circle"></i> Límite: 20 caracteres.</small>
                 </div>
+                <div class="col-md-4"></div> <!-- Espacio vacío -->
+
+                <div class="col-md-4"><label class="form-label">Tipo de Contratación</label><input class="form-control" value="@(Model.TipoContratacion ?? "—")" readonly /></div>
+                <div class="col-md-4"><label class="form-label">Fecha de contratación</label><input class="form-control" value="@(Model.FechaContratacion?.ToString("dd / MM / yyyy") ?? "—")" readonly /></div>
             </div>
 
             @{
