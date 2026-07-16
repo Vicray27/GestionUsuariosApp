@@ -159,7 +159,7 @@ namespace GestionUsuariosApp.Controllers
                 var correoDestino = string.IsNullOrEmpty(usuario.CorreoPrincipal) ? "SIN_CORREO" : usuario.CorreoPrincipal;
 
                 var contenidoCorreo = $@"
-==================================================
+=================PRUEBA DE SIMULACIÓN=================================
 SIMULACIÓN DE ENVÍO DE CORREO - SISTEMA CEPLAN
 ==================================================
 Fecha: {DateTime.Now:dd/MM/yyyy HH:mm:ss}
@@ -228,6 +228,15 @@ El equipo de Seguridad
         {
             if (ModelState.IsValid)
             {
+                // Validación: Evitar duplicados por Tipo y Número de Documento
+                var existeUsuario = await _context.Usuarios.AnyAsync(u => u.TipoDocumento == usuario.TipoDocumento && u.NumeroDocumento == usuario.NumeroDocumento);
+                if (existeUsuario)
+                {
+                    ModelState.AddModelError("NumeroDocumento", "El documento ya se encuentra registrado.");
+                    ViewBag.ErrorMessage = "Ya existe un usuario registrado con este tipo y número de documento.";
+                    return View(usuario);
+                }
+
                 _context.Add(usuario);
                 await _context.SaveChangesAsync();
                 TempData["MensajeExito"] = "El usuario se ha registrado correctamente.";
@@ -265,11 +274,29 @@ El equipo de Seguridad
                 {
                     // BUSCAMOS EL USUARIO ORIGINAL EN LA BASE DE DATOS
                     var usuarioOriginal = await _context.Usuarios.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+                    if (usuarioOriginal == null) return NotFound();
+
+                    // Prevenir manipulación de datos sensibles desde el cliente
+                    usuario.TipoDocumento = usuarioOriginal.TipoDocumento;
+                    usuario.NumeroDocumento = usuarioOriginal.NumeroDocumento;
+
+                    // Si el administrador activa la cuenta manualmente, reseteamos bloqueos
+                    if (usuario.Estado && !usuarioOriginal.Estado)
+                    {
+                        usuario.CVF = 0;
+                        usuario.FechaBloqueo = null;
+                    }
+                    else
+                    {
+                        // Preservar los valores reales de BD, no confiar en el formulario
+                        usuario.CVF = usuarioOriginal.CVF;
+                        usuario.FechaBloqueo = usuarioOriginal.FechaBloqueo;
+                    }
 
                     // Si la contraseña viene vacía, mantenemos la anterior
                     if (string.IsNullOrEmpty(usuario.Contrasena))
                     {
-                        usuario.Contrasena = usuarioOriginal?.Contrasena;
+                        usuario.Contrasena = usuarioOriginal.Contrasena;
                     }
 
                     _context.Update(usuario);

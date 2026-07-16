@@ -111,6 +111,33 @@
                 <input asp-for="CorreoPrincipal" type="email" class="form-control" placeholder="ejemplo@minsa.gob.pe" />
             </div>
 
+            <div class="col-md-3">
+                <label class="form-label">Nacionalidad</label>
+                <input asp-for="Nacionalidad" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Sexo</label>
+                <select asp-for="Sexo" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tipo Contratación</label>
+                <input asp-for="TipoContratacion" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha Contratación</label>
+                <input asp-for="FechaContratacion" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label">Teléfono Móvil</label>
+                <input asp-for="TelefonoMovil" id="inputTelefono" class="form-control" />
+            </div>
+
             <input type="hidden" asp-for="Estado" value="true" />
             <input type="hidden" asp-for="CVF" value="0" />
         </div>
@@ -137,6 +164,13 @@
             const btnSpinner = document.getElementById('btnSpinner');
             const tipoDoc = document.getElementById('TipoDocumento');
             const inputNumDoc = document.getElementById('inputNumDoc');
+            const inputTelefono = document.getElementById('inputTelefono');
+
+            if(inputTelefono) {
+                inputTelefono.addEventListener('input', function() {
+                    this.value = this.value.replace(/\D/g, '');
+                });
+            }
 
             // Limpiar letras si es DNI
             inputNumDoc.addEventListener('input', function() {
@@ -165,7 +199,24 @@
 
             // Si hay errores del modelo (vienen del servidor)
             const hasErrors = '@(!ViewData.ModelState.IsValid)'.toLowerCase() === 'true';
-            if (hasErrors) {
+            
+            var serverErrors = [];
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    <text>serverErrors.push('@Html.Raw(error.ErrorMessage.Replace("'", "\\'"))');</text>
+                }
+            }
+
+            const customError = '@Html.Raw(ViewBag.ErrorMessage ?? "")'.trim();
+
+            if (customError) {
+                if(typeof showToast === 'function') showToast('danger', 'Error de registro', customError);
+            } else if (serverErrors.length > 0) {
+                // Mostrar solo el primer error o todos, aquí unimos con salto de línea
+                if(typeof showToast === 'function') showToast('danger', 'Error de validación', serverErrors.join('<br>'));
+            } else if (hasErrors) {
                 if(typeof showToast === 'function') showToast('danger', 'Error de validación', 'Revise los campos del formulario. Asegúrese de completar los datos obligatorios.');
             }
 

@@ -20,7 +20,7 @@ namespace GestionUsuariosApp.Models
         [StringLength(20)]
         public string PrimerApellido { get; set; } = null!;
         [StringLength(20)]
-        public string SegundoApellido { get; set; } = null!;
+        public string? SegundoApellido { get; set; }
         [StringLength(30)]
         public string? Cargo { get; set; }
         [StringLength(30)]

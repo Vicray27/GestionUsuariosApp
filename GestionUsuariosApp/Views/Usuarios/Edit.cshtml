@@ -115,6 +115,28 @@
                 <input asp-for="Contrasena" type="password" class="form-control" placeholder="Dejar en blanco para mantener actual" />
             </div>
 
+            <div class="col-md-3">
+                <label class="form-label">Nacionalidad</label>
+                <input asp-for="Nacionalidad" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Sexo</label>
+                <select asp-for="Sexo" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tipo Contratación</label>
+                <input asp-for="TipoContratacion" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha Contratación</label>
+                <input asp-for="FechaContratacion" type="date" class="form-control" />
+            </div>
+
             <div class="col-md-6">
                 <label class="form-label">Correo Electrónico</label>
                 <input asp-for="CorreoPrincipal" type="email" class="form-control" />
@@ -169,7 +191,19 @@
 
             // Si hay errores del modelo (vienen del servidor)
             const hasErrors = '@(!ViewData.ModelState.IsValid)'.toLowerCase() === 'true';
-            if (hasErrors) {
+            
+            var serverErrors = [];
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    <text>serverErrors.push('@Html.Raw(error.ErrorMessage.Replace("'", "\\'"))');</text>
+                }
+            }
+
+            if (serverErrors.length > 0) {
+                if(typeof showToast === 'function') showToast('danger', 'Error de validación', serverErrors.join('<br>'));
+            } else if (hasErrors) {
                 if(typeof showToast === 'function') showToast('danger', 'Error de validación', 'Revise los campos del formulario. Asegúrese de completar los datos obligatorios.');
             }
 
